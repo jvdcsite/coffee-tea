@@ -1,0 +1,74 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "coffee-tea-site",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Serves site/index.html and friends as static assets. Requests to /api/*
+  // are routed to the Worker first (see run_worker_first below); everything
+  // else is served directly from the assets directory with no Worker
+  // invocation at all — keeps request usage down.
+  "assets": {
+    "directory": "./site",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // TODO: after `wrangler d1 create coffee-tea-db`, paste the database_id
+  // it prints here.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "coffee-tea-db",
+      "database_id": "6df5e015-d18b-4bf5-a8c8-2747c7309fe0"
+    }
+  ],
+
+  // TODO: after `wrangler r2 bucket create coffee-tea-media`, confirm the
+  // bucket name matches below (no separate ID needed for R2 bindings).
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "coffee-tea-media"
+    }
+  ],
+
+  // Custom domain routing — fill in once the domain's DNS is on Cloudflare.
+  // Leave this array empty to deploy first on the workers.dev subdomain,
+  // confirm everything works, then add the route.
+  "routes": [
+    // { "pattern": "example.com", "custom_domain": true },
+    // { "pattern": "www.example.com", "custom_domain": true }
+  ],
+
+  "observability": {
+    "enabled": true
+  },
+
+  // Secrets are NOT set here — never commit real credentials.
+  // Set them with:
+  //   wrangler secret put ADMIN_USERNAME
+  //   wrangler secret put ADMIN_PASSWORD_HASH
+  //   wrangler secret put SHEETS_WEBHOOK_URL
+  //   wrangler secret put TURNSTILE_SECRET_KEY
+  "env": {
+    "staging": {
+      "name": "coffee-tea-site-staging",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "coffee-tea-db",
+          "database_id": "6df5e015-d18b-4bf5-a8c8-2747c7309fe0"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "MEDIA",
+          "bucket_name": "coffee-tea-media"
+        }
+      ]
+    }
+  }
+}

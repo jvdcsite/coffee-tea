@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Ember & Leaf</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* "Cream & Cobalt" palette — matches site/index.html. */
+    --ink: #1D1B17;
+    --paper: #F3EEE3;
+    --paper-raised: #ffffff;
+    --coffee: #2C4A6E;
+    --tea: #B98A2E;
+    --gold: #B98A2E;
+    --danger: #a13d2a;
+    --line: rgba(29, 27, 23, 0.15);
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); }
+  button, input, select, textarea { font-family: inherit; font-size: 0.9rem; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 500; margin: 0; }
+
+  .hidden { display: none !important; }
+
+  /* ---------- Login ---------- */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-box {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 36px;
+    width: 100%;
+    max-width: 360px;
+  }
+  .login-box h1 { font-size: 1.4rem; margin-bottom: 6px; }
+  .login-box p.sub { margin: 0 0 20px; opacity: 0.65; font-size: 0.85rem; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.78rem; opacity: 0.7; margin-bottom: 4px; }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: #fff;
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border: none;
+    border-radius: 5px;
+    padding: 9px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn.secondary { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn.danger { background: var(--danger); color: #fff; }
+  .btn.full { width: 100%; }
+  .error-msg { color: var(--danger); font-size: 0.82rem; margin-top: 8px; }
+
+  /* ---------- Shell ---------- */
+  #dashboard { display: none; }
+  #dashboard.visible { display: block; }
+
+  header.top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px;
+    background: var(--paper-raised);
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 5;
+  }
+  header.top nav { display: flex; gap: 6px; }
+  header.top nav button {
+    border: none; background: transparent; padding: 7px 14px; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+  }
+  header.top nav button.active { background: var(--ink); color: var(--paper); }
+
+  main.content { max-width: 1080px; margin: 0 auto; padding: 28px 24px 80px; }
+  .panel-section { display: none; }
+  .panel-section.visible { display: block; }
+
+  .row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 0.85rem; }
+  th { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
+  tr:last-child td { border-bottom: none; }
+  tr.clickable { cursor: pointer; }
+  tr.clickable:hover { background: rgba(28,20,16,0.03); }
+
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .dot.ok { background: #4d7a4a; }
+  .dot.bad { background: var(--danger); }
+  .dot.unknown { background: #bbb; }
+
+  .badge { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; background: rgba(28,20,16,0.08); }
+
+  .card-box { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+
+  .diff-list { max-height: 320px; overflow-y: auto; border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; background: #fff; margin-bottom: 14px; }
+  .diff-list h4 { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; opacity: 0.6; margin: 12px 0 6px; }
+  .diff-list ul { margin: 0; padding-left: 18px; font-size: 0.82rem; }
+
+  .calc-box { background: rgba(201,138,62,0.1); border: 1px solid rgba(201,138,62,0.35); border-radius: 6px; padding: 14px; margin-top: 8px; }
+  .calc-box .row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .calc-box .field { flex: 1; min-width: 120px; margin-bottom: 0; }
+  .calc-result { font-family: var(--font-mono); font-weight: 500; margin-top: 10px; font-size: 0.9rem; }
+
+  .toast {
+    position: fixed; bottom: 20px; right: 20px;
+    background: var(--ink); color: var(--paper);
+    padding: 10px 16px; border-radius: 5px; font-size: 0.85rem;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Admin</h1>
+    <p class="sub">Ember &amp; Leaf dashboard</p>
+    <div class="field">
+      <label for="login-username">Username</label>
+      <input id="login-username" type="text" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="login-password">Password</label>
+      <input id="login-password" type="password" autocomplete="current-password">
+    </div>
+    <button class="btn full" id="login-btn">Log in</button>
+    <div class="error-msg hidden" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ================= DASHBOARD ================= -->
+<div id="dashboard">
+  <header class="top">
+    <h1 style="font-size:1.1rem">Ember &amp; Leaf — Admin</h1>
+    <nav>
+      <button class="active" data-panel="list">Products</button>
+      <button data-panel="health">Health check</button>
+      <button data-panel="sheets">Sheets sync</button>
+      <button data-panel="newsletter">Newsletter</button>
+    </nav>
+    <button class="btn secondary" id="logout-btn">Log out</button>
+  </header>
+
+  <main class="content">
+
+    <!-- ---- Product list ---- -->
+    <section class="panel-section visible" id="panel-list">
+      <div class="row-between">
+        <h2>Products</h2>
+        <button class="btn" id="new-product-btn">+ New product</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Active</th></tr>
+        </thead>
+        <tbody id="products-tbody">
+          <tr><td colspan="6">Loading…</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ---- Product detail/edit form ---- -->
+    <section class="panel-section" id="panel-form">
+      <div class="row-between">
+        <h2 id="form-title">New product</h2>
+        <button class="btn secondary" id="back-to-list-btn">&larr; Back to list</button>
+      </div>
+
+      <div class="card-box">
+        <div class="grid-2">
+          <div class="field"><label>Name</label><input id="f-name"></div>
+          <div class="field"><label>Category</label>
+            <select id="f-category"><option value="coffee">Coffee</option><option value="tea">Tea</option></select>
+          </div>
+          <div class="field"><label>Origin</label><input id="f-origin" placeholder="e.g. Yirgacheffe, Ethiopia"></div>
+          <div class="field"><label>Altitude (m)</label><input id="f-altitude" type="number"></div>
+          <div class="field"><label>Process</label><input id="f-process" placeholder="washed / natural / oxidized…"></div>
+          <div class="field" id="f-roast-wrap"><label>Roast level (coffee)</label>
+            <select id="f-roast"><option value="">—</option><option value="light">Light</option><option value="medium">Medium</option><option value="dark">Dark</option></select>
+          </div>
+          <div class="field hidden" id="f-leaf-wrap"><label>Leaf type (tea)</label><input id="f-leaf" placeholder="black / green / oolong…"></div>
+          <div class="field hidden" id="f-caffeine-wrap"><label>Caffeine level (tea)</label>
+            <select id="f-caffeine"><option value="">—</option><option value="none">None</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
+          </div>
+          <div class="field"><label>Stock count</label><input id="f-stock" type="number" value="0"></div>
+          <div class="field"><label>Weight (grams)</label><input id="f-weight" type="number"></div>
+          <div class="field"><label>Active on site</label>
+            <select id="f-active"><option value="1">Yes</option><option value="0">No</option></select>
+          </div>
+        </div>
+        <div class="field"><label>Flavor notes</label><input id="f-notes" placeholder="jasmine, bergamot, stone fruit"></div>
+        <div class="field"><label>Description</label><textarea id="f-description" rows="3"></textarea></div>
+
+        <!-- ---- Margin calculator (kept inline per brief, not a separate tool) ---- -->
+        <div class="calc-box">
+          <strong style="font-size:0.85rem">Margin calculator</strong>
+          <div class="row" style="margin-top:8px">
+            <div class="field"><label>Cost per unit ($)</label><input id="calc-cost" type="number" step="0.01"></div>
+            <div class="field"><label>Sale price ($)</label><input id="calc-price" type="number" step="0.01"></div>
+            <button class="btn secondary" id="calc-apply-price">Use as price above &rarr;</button>
+          </div>
+          <div class="calc-result" id="calc-result">Enter a cost and a price to see margin.</div>
+        </div>
+
+        <!-- ---- Image upload (client resizes/converts before this point) ---- -->
+        <div class="field" style="margin-top:16px">
+          <label>Product image (will be resized + converted to WebP in your browser before upload)</label>
+          <input id="f-image-input" type="file" accept="image/*">
+          <div id="f-image-status" style="font-size:0.78rem;opacity:0.65;margin-top:4px"></div>
+        </div>
+
+        <div style="margin-top:20px; display:flex; gap:10px">
+          <button class="btn" id="save-product-btn">Save product</button>
+          <button class="btn danger hidden" id="delete-product-btn">Delete</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- Health check ---- -->
+    <section class="panel-section" id="panel-health">
+      <div class="row-between">
+        <h2>Health check</h2>
+        <button class="btn" id="run-health-btn">Run check</button>
+      </div>
+      <table>
+        <thead><tr><th></th><th>Product</th><th>Issues</th></tr></thead>
+        <tbody id="health-tbody"><tr><td colspan="3">Click "Run check" to scan all products.</td></tr></tbody>
+      </table>
+    </section>
+
+    <!-- ---- Sheets sync ---- -->
+    <section class="panel-section" id="panel-sheets">
+      <h2>Sheets sync</h2>
+      <p style="opacity:0.7;font-size:0.88rem;max-width:60ch">
+        Push sends every product to the Google Sheet as-is (overwrites the sheet's data).
+        Restore compares the sheet against D1 and only adds new rows or updates changed
+        ones — it never deletes a product just because it's missing from the sheet.
+      </p>
+      <div class="toolbar">
+        <button class="btn" id="sheets-push-btn">Push D1 → Sheet</button>
+        <button class="btn secondary" id="sheets-diff-btn">Preview restore diff</button>
+      </div>
+      <div id="sheets-diff-container"></div>
+    </section>
+
+    <!-- ---- Newsletter ---- -->
+    <section class="panel-section" id="panel-newsletter">
+      <div class="row-between">
+        <h2>Newsletter</h2>
+        <div style="display:flex;gap:10px">
+          <button class="btn secondary" id="newsletter-export-btn">Export CSV</button>
+          <button class="btn secondary" id="newsletter-refresh-btn">Refresh</button>
+        </div>
+      </div>
+
+      <div class="card-box">
+        <strong style="font-size:0.85rem">Subscribers</strong>
+        <span id="newsletter-count" style="opacity:0.6;font-size:0.8rem;margin-left:8px"></span>
+        <table style="margin-top:12px">
+          <thead><tr><th>Email</th><th>Subscribed</th><th></th></tr></thead>
+          <tbody id="newsletter-tbody"><tr><td colspan="3">Loading…</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="card-box">
+        <strong style="font-size:0.85rem">Compose &amp; send</strong>
+        <p style="opacity:0.65;font-size:0.82rem;max-width:60ch;margin:8px 0 14px">
+          Sending isn't wired up yet — this list only captures emails to D1 today.
+          Actually sending a campaign needs an email provider (e.g. Resend or
+          Mailchannels) added as a Worker secret plus a send route in
+          <code>worker/index.js</code>. The form below is left in place so
+          copy can be drafted now; "Send" stays disabled until that
+          integration exists.
+        </p>
+        <div class="field"><label>Subject</label><input id="newsletter-subject" placeholder="What's brewing this month"></div>
+        <div class="field"><label>Body</label><textarea id="newsletter-body" rows="5" placeholder="Draft your update here…"></textarea></div>
+        <button class="btn full" id="newsletter-send-btn" disabled title="Email sending isn't wired up yet">Send to subscribers — not wired up yet</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const API = '/api';
+  let token = sessionStorage.getItem('admin_token');
+  let products = [];
+  let editingId = null;
+  let pendingDiff = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  async function api(path, options = {}) {
+    const res = await fetch(API + path, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        ...(token ? { Authorization: 'Bearer ' + token } : {}),
+      },
+    });
+    if (res.status === 401) {
+      logout();
+      throw new Error('Session expired');
+    }
+    return res;
+  }
+
+  // ---------------- Auth ----------------
+
+  function showDashboard() {
+    $('login-screen').classList.add('hidden');
+    $('dashboard').classList.add('visible');
+    loadProducts();
+  }
+
+  function logout() {
+    sessionStorage.removeItem('admin_token');
+    token = null;
+    $('dashboard').classList.remove('visible');
+    $('login-screen').classList.remove('hidden');
+  }
+
+  $('login-btn').addEventListener('click', async () => {
+    const username = $('login-username').value.trim();
+    const password = $('login-password').value;
+    $('login-error').classList.add('hidden');
+    try {
+      const res = await fetch(API + '/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+      token = data.token;
+      sessionStorage.setItem('admin_token', token);
+      showDashboard();
+    } catch (err) {
+      $('login-error').textContent = err.message;
+      $('login-error').classList.remove('hidden');
+    }
+  });
+
+  $('logout-btn').addEventListener('click', logout);
+
+  if (token) showDashboard();
+
+  // ---------------- Nav ----------------
+
+  document.querySelectorAll('header.top nav button').forEach((btn) => {
+    btn.addEventListener('click', () => switchPanel(btn.dataset.panel));
+  });
+
+  function switchPanel(name) {
+    document.querySelectorAll('header.top nav button').forEach((b) => b.classList.toggle('active', b.dataset.panel === name));
+    document.querySelectorAll('.panel-section').forEach((s) => s.classList.remove('visible'));
+    const map = { list: 'panel-list', form: 'panel-form', health: 'panel-health', sheets: 'panel-sheets', newsletter: 'panel-newsletter' };
+    $(map[name]).classList.add('visible');
+    if (name === 'newsletter') loadNewsletterSubscribers();
+  }
+
+  // ---------------- Product list ----------------
+
+  async function loadProducts() {
+    const res = await api('/admin/products');
+    const data = await res.json();
+    products = data.products || [];
+    renderProductsTable();
+  }
+
+  function renderProductsTable() {
+    const tbody = $('products-tbody');
+    if (products.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6">No products yet — add the first one.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = products.map((p) => (
+      '<tr class="clickable" data-id="' + p.id + '">' +
+        '<td><span class="dot unknown"></span></td>' +
+        '<td>' + escapeHtml(p.name) + '</td>' +
+        '<td><span class="badge">' + p.category + '</span></td>' +
+        '<td>$' + (p.price_cents / 100).toFixed(2) + '</td>' +
+        '<td>' + p.stock_count + '</td>' +
+        '<td>' + (p.active ? 'Yes' : 'No') + '</td>' +
+      '</tr>'
+    )).join('');
+    tbody.querySelectorAll('tr').forEach((row) => {
+      row.addEventListener('click', () => openForm(row.dataset.id));
+    });
+  }
+
+  $('new-product-btn').addEventListener('click', () => openForm(null));
+  $('back-to-list-btn').addEventListener('click', () => switchPanel('list'));
+
+  // ---------------- Form ----------------
+
+  function toggleCategoryFields() {
+    const isTea = $('f-category').value === 'tea';
+    $('f-roast-wrap').classList.toggle('hidden', isTea);
+    $('f-leaf-wrap').classList.toggle('hidden', !isTea);
+    $('f-caffeine-wrap').classList.toggle('hidden', !isTea);
+  }
+  $('f-category').addEventListener('change', toggleCategoryFields);
+
+  function openForm(id) {
+    editingId = id;
+    const p = id ? products.find((x) => x.id === id) : null;
+    $('form-title').textContent = p ? 'Edit product' : 'New product';
+    $('delete-product-btn').classList.toggle('hidden', !p);
+
+    $('f-name').value = p?.name || '';
+    $('f-category').value = p?.category || 'coffee';
+    $('f-origin').value = p?.origin || '';
+    $('f-altitude').value = p?.altitude_m || '';
+    $('f-process').value = p?.process || '';
+    $('f-roast').value = p?.roast_level || '';
+    $('f-leaf').value = p?.leaf_type || '';
+    $('f-caffeine').value = p?.caffeine_level || '';
+    $('f-stock').value = p?.stock_count ?? 0;
+    $('f-weight').value = p?.weight_grams || '';
+    $('f-active').value = String(p?.active ?? 1);
+    $('f-notes').value = p?.flavor_notes || '';
+    $('f-description').value = p?.description || '';
+    $('f-image-status').textContent = p?.image_key ? ('Current image: ' + p.image_key) : 'No image uploaded yet.';
+    $('calc-cost').value = '';
+    $('calc-price').value = p ? (p.price_cents / 100).toFixed(2) : '';
+    updateCalc();
+
+    toggleCategoryFields();
+    switchPanel('form');
+  }
+
+  function collectFormData() {
+    return {
+      name: $('f-name').value.trim(),
+      category: $('f-category').value,
+      origin: $('f-origin').value.trim() || null,
+      altitude_m: $('f-altitude').value ? Number($('f-altitude').value) : null,
+      process: $('f-process').value.trim() || null,
+      roast_level: $('f-roast').value || null,
+      leaf_type: $('f-leaf').value.trim() || null,
+      caffeine_level: $('f-caffeine').value || null,
+      stock_count: Number($('f-stock').value || 0),
+      weight_grams: $('f-weight').value ? Number($('f-weight').value) : null,
+      active: Number($('f-active').value),
+      flavor_notes: $('f-notes').value.trim() || null,
+      description: $('f-description').value.trim() || null,
+      price_cents: Math.round(Number($('calc-price').value || 0) * 100),
+    };
+  }
+
+  $('save-product-btn').addEventListener('click', async () => {
+    const payload = collectFormData();
+    if (!payload.name || !payload.price_cents) {
+      showToast('Name and price are required.');
+      return;
+    }
+    try {
+      if (editingId) {
+        await api('/admin/products/' + editingId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      } else {
+        const res = await api('/admin/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        editingId = data.id;
+      }
+
+      const fileInput = $('f-image-input');
+      if (fileInput.files[0]) {
+        await uploadImage(editingId, fileInput.files[0]);
+      }
+
+      showToast('Saved.');
+      await loadProducts();
+      switchPanel('list');
+    } catch (err) {
+      showToast('Error: ' + err.message);
+    }
+  });
+
+  $('delete-product-btn').addEventListener('click', async () => {
+    if (!editingId) return;
+    if (!confirm('Delete this product permanently?')) return;
+    await api('/admin/products/' + editingId, { method: 'DELETE' });
+    showToast('Deleted.');
+    await loadProducts();
+    switchPanel('list');
+  });
+
+  // ---------------- Client-side image processing ----------------
+  // Resize to a max dimension, convert to WebP, and produce a thumbnail —
+  // all in-browser so the Worker only ever receives finished files.
+
+  async function uploadImage(productId, file) {
+    $('f-image-status').textContent = 'Processing image…';
+    const full = await resizeToWebp(file, 1200);
+    const thumb = await resizeToWebp(file, 300);
+
+    await api('/admin/upload', {
+      method: 'POST',
+      headers: { 'X-Product-Id': productId, 'X-Variant': 'full', 'Content-Type': 'image/webp' },
+      body: full,
+    });
+    await api('/admin/upload', {
+      method: 'POST',
+      headers: { 'X-Product-Id': productId, 'X-Variant': 'thumb', 'Content-Type': 'image/webp' },
+      body: thumb,
+    });
+    $('f-image-status').textContent = 'Image uploaded.';
+  }
+
+  function resizeToWebp(file, maxDim) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(url);
+          blob ? resolve(blob) : reject(new Error('Could not encode image'));
+        }, 'image/webp', 0.85);
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  // ---------------- Margin calculator ----------------
+
+  function updateCalc() {
+    const cost = Number($('calc-cost').value);
+    const price = Number($('calc-price').value);
+    const out = $('calc-result');
+    if (!cost || !price) { out.textContent = 'Enter a cost and a price to see margin.'; return; }
+    const profit = price - cost;
+    const marginPct = (profit / price) * 100;
+    const markupPct = (profit / cost) * 100;
+    out.textContent = 'Profit: $' + profit.toFixed(2) + '  ·  Margin: ' + marginPct.toFixed(1) + '%  ·  Markup: ' + markupPct.toFixed(1) + '%';
+  }
+  $('calc-cost').addEventListener('input', updateCalc);
+  $('calc-price').addEventListener('input', updateCalc);
+  $('calc-apply-price').addEventListener('click', () => { updateCalc(); showToast('Price field above updated.'); });
+
+  // ---------------- Health check ----------------
+
+  $('run-health-btn').addEventListener('click', async () => {
+    $('health-tbody').innerHTML = '<tr><td colspan="3">Checking…</td></tr>';
+    const res = await api('/admin/health-check', { method: 'POST' });
+    const data = await res.json();
+    if (data.report.length === 0) {
+      $('health-tbody').innerHTML = '<tr><td colspan="3">No products to check.</td></tr>';
+      return;
+    }
+    $('health-tbody').innerHTML = data.report.map((r) => (
+      '<tr>' +
+        '<td><span class="dot ' + (r.ok ? 'ok' : 'bad') + '"></span></td>' +
+        '<td>' + escapeHtml(r.name || r.id) + '</td>' +
+        '<td>' + (r.ok ? 'All good' : r.issues.join(', ')) + '</td>' +
+      '</tr>'
+    )).join('');
+  });
+
+  // ---------------- Sheets sync ----------------
+
+  $('sheets-push-btn').addEventListener('click', async () => {
+    try {
+      const res = await api('/admin/sheets/push', { method: 'POST' });
+      const data = await res.json();
+      showToast('Pushed ' + data.count + ' products to the Sheet.');
+    } catch (err) {
+      showToast('Push failed: ' + err.message);
+    }
+  });
+
+  $('sheets-diff-btn').addEventListener('click', async () => {
+    const container = $('sheets-diff-container');
+    container.innerHTML = '<p>Comparing…</p>';
+    try {
+      const res = await api('/admin/sheets/diff');
+      const diff = await res.json();
+      pendingDiff = diff;
+      renderDiff(diff);
+    } catch (err) {
+      container.innerHTML = '<p>Diff failed: ' + err.message + '</p>';
+    }
+  });
+
+  function renderDiff(diff) {
+    const container = $('sheets-diff-container');
+    const section = (title, items, renderItem) => (
+      '<div class="diff-list"><h4>' + title + ' (' + items.length + ')</h4>' +
+      (items.length ? '<ul>' + items.map(renderItem).join('') + '</ul>' : '<p style="opacity:0.5;font-size:0.82rem">None</p>') +
+      '</div>'
+    );
+
+    container.innerHTML =
+      section('Will add (new in Sheet)', diff.added, (r) => '<li>' + escapeHtml(r.name || r.id) + '</li>') +
+      section('Will update (changed)', diff.updated, (r) => '<li>' + escapeHtml(r.sheet.name || r.id) + '</li>') +
+      section('Unchanged', diff.unchanged, (r) => '<li>' + escapeHtml(r.name || r.id) + '</li>') +
+      section('In D1 only — will NOT be touched', diff.d1_only, (r) => '<li>' + escapeHtml(r.name || r.id) + '</li>') +
+      (diff.added.length || diff.updated.length
+        ? '<button class="btn" id="apply-restore-btn">Apply add + update (no deletes)</button>'
+        : '');
+
+    const applyBtn = $('apply-restore-btn');
+    if (applyBtn) applyBtn.addEventListener('click', applyRestore);
+  }
+
+  async function applyRestore() {
+    if (!pendingDiff) return;
+    if (!confirm('Apply ' + pendingDiff.added.length + ' additions and ' + pendingDiff.updated.length + ' updates from the Sheet into D1?')) return;
+    const res = await api('/admin/sheets/restore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ added: pendingDiff.added, updated: pendingDiff.updated }),
+    });
+    const data = await res.json();
+    showToast('Restored: ' + data.added + ' added, ' + data.updated + ' updated.');
+    $('sheets-diff-container').innerHTML = '';
+    pendingDiff = null;
+    await loadProducts();
+  }
+
+  // ---------------- Newsletter ----------------
+
+  let newsletterSubscribers = [];
+
+  async function loadNewsletterSubscribers() {
+    $('newsletter-tbody').innerHTML = '<tr><td colspan="3">Loading…</td></tr>';
+    try {
+      const res = await api('/admin/newsletter/subscribers');
+      const data = await res.json();
+      newsletterSubscribers = data.subscribers || [];
+      renderNewsletterTable();
+    } catch (err) {
+      $('newsletter-tbody').innerHTML = '<tr><td colspan="3">Failed to load: ' + err.message + '</td></tr>';
+    }
+  }
+
+  function renderNewsletterTable() {
+    $('newsletter-count').textContent = newsletterSubscribers.length + (newsletterSubscribers.length === 1 ? ' subscriber' : ' subscribers');
+    if (newsletterSubscribers.length === 0) {
+      $('newsletter-tbody').innerHTML = '<tr><td colspan="3">No subscribers yet.</td></tr>';
+      return;
+    }
+    $('newsletter-tbody').innerHTML = newsletterSubscribers.map((s) => (
+      '<tr>' +
+        '<td>' + escapeHtml(s.email) + '</td>' +
+        '<td>' + escapeHtml(s.subscribed_at) + '</td>' +
+        '<td><button class="btn secondary" data-unsub="' + escapeHtml(s.email) + '" style="padding:4px 10px;font-size:0.78rem">Remove</button></td>' +
+      '</tr>'
+    )).join('');
+    $('newsletter-tbody').querySelectorAll('[data-unsub]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const email = btn.dataset.unsub;
+        if (!confirm('Remove ' + email + ' from the list?')) return;
+        await api('/admin/newsletter/subscribers/' + encodeURIComponent(email), { method: 'DELETE' });
+        showToast('Removed.');
+        await loadNewsletterSubscribers();
+      });
+    });
+  }
+
+  $('newsletter-refresh-btn').addEventListener('click', loadNewsletterSubscribers);
+
+  $('newsletter-export-btn').addEventListener('click', () => {
+    if (newsletterSubscribers.length === 0) { showToast('No subscribers to export.'); return; }
+    const rows = [['email', 'subscribed_at']].concat(newsletterSubscribers.map((s) => [s.email, s.subscribed_at]));
+    const csv = rows.map((r) => r.map((cell) => '"' + String(cell).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'newsletter-subscribers.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : str;
+    return div.innerHTML;
+  }
+})();
+</script>
+
+</body>
+</html>
