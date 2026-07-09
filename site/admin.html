@@ -75,7 +75,7 @@
 
   header.top {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 24px;
+    padding: 14px clamp(20px, 4vw, 40px);
     background: var(--paper-raised);
     border-bottom: 1px solid var(--line);
     position: sticky; top: 0; z-index: 5;
@@ -86,7 +86,7 @@
   }
   header.top nav button.active { background: var(--ink); color: var(--paper); }
 
-  main.content { max-width: 1080px; margin: 0 auto; padding: 28px 24px 80px; }
+  main.content { max-width: 1080px; margin: 0 auto; padding: 28px clamp(20px, 4vw, 40px) 80px; }
   .panel-section { display: none; }
   .panel-section.visible { display: block; }
 
@@ -99,11 +99,6 @@
   tr.clickable { cursor: pointer; }
   tr.clickable:hover { background: rgba(28,20,16,0.03); }
 
-  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
-  .dot.ok { background: #4d7a4a; }
-  .dot.bad { background: var(--danger); }
-  .dot.unknown { background: #bbb; }
-
   .badge { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; background: rgba(28,20,16,0.08); }
 
   .card-box { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 6px; padding: 20px; margin-bottom: 20px; }
@@ -113,14 +108,31 @@
 
   .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
 
-  .diff-list { max-height: 320px; overflow-y: auto; border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; background: #fff; margin-bottom: 14px; }
-  .diff-list h4 { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; opacity: 0.6; margin: 12px 0 6px; }
-  .diff-list ul { margin: 0; padding-left: 18px; font-size: 0.82rem; }
-
   .calc-box { background: rgba(201,138,62,0.1); border: 1px solid rgba(201,138,62,0.35); border-radius: 6px; padding: 14px; margin-top: 8px; }
   .calc-box .row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
   .calc-box .field { flex: 1; min-width: 120px; margin-bottom: 0; }
   .calc-result { font-family: var(--font-mono); font-weight: 500; margin-top: 10px; font-size: 0.9rem; }
+
+  /* ---------- Site Media ---------- */
+  .live-preview-wrap { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0 28px; }
+  .live-preview-frame { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+  .live-preview-frame .frame-label {
+    font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+    opacity: 0.6; padding: 8px 12px; border-bottom: 1px solid var(--line);
+  }
+  .live-preview-viewport { overflow: hidden; }
+  .live-preview-viewport iframe { border: none; display: block; transform-origin: top left; pointer-events: none; }
+
+  .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .media-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+  .media-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; background: var(--paper); margin-bottom: 10px; display: block; }
+  .media-card .media-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 2px; }
+  .media-card .media-meta { font-size: 0.7rem; opacity: 0.5; font-family: var(--font-mono); margin-bottom: 10px; }
+  .media-card input[type="file"] { width: 100%; font-size: 0.78rem; }
+
+  @media (max-width: 640px) {
+    .live-preview-wrap { justify-content: center; }
+  }
 
   .toast {
     position: fixed; bottom: 20px; right: 20px;
@@ -159,8 +171,8 @@
     <h1 style="font-size:1.1rem">Ember &amp; Leaf — Admin</h1>
     <nav>
       <button class="active" data-panel="list">Products</button>
-      <button data-panel="health">Health check</button>
-      <button data-panel="sheets">Sheets sync</button>
+      <button data-panel="sitemedia">Site Media</button>
+      <button data-panel="orders">Orders</button>
       <button data-panel="newsletter">Newsletter</button>
     </nav>
     <button class="btn secondary" id="logout-btn">Log out</button>
@@ -231,7 +243,7 @@
         <div class="field" style="margin-top:16px">
           <label>Product image (will be resized + converted to WebP in your browser before upload)</label>
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-            <img id="f-image-preview" src="/assets/marketing/product-placeholder.webp" alt="" style="width:56px;height:56px;border-radius:6px;object-fit:cover;border:1px solid var(--line)">
+            <img id="f-image-preview" src="/media/marketing/product-placeholder.webp" alt="" style="width:56px;height:56px;border-radius:6px;object-fit:cover;border:1px solid var(--line)">
             <input id="f-image-input" type="file" accept="image/*">
           </div>
           <div id="f-image-status" style="font-size:0.78rem;opacity:0.65;margin-top:4px"></div>
@@ -244,31 +256,62 @@
       </div>
     </section>
 
-    <!-- ---- Health check ---- -->
-    <section class="panel-section" id="panel-health">
+    <!-- ---- Site Media ---- -->
+    <section class="panel-section" id="panel-sitemedia">
       <div class="row-between">
-        <h2>Health check</h2>
-        <button class="btn" id="run-health-btn">Run check</button>
+        <h2>Site Media</h2>
+        <button class="btn secondary" id="sitemedia-refresh-btn">Refresh</button>
       </div>
-      <table>
-        <thead><tr><th></th><th>Product</th><th>Issues</th></tr></thead>
-        <tbody id="health-tbody"><tr><td colspan="3">Click "Run check" to scan all products.</td></tr></tbody>
-      </table>
+      <p style="opacity:0.7;font-size:0.88rem;max-width:70ch;margin-top:-6px">
+        These are the images used across the homepage — hero slides, category tiles,
+        the brand-story photo, and the fallback image shown for products with no
+        photo yet. Pick a replacement below and it goes live immediately, no redeploy
+        needed. Uploads are resized in your browser first, same as product photos.
+      </p>
+
+      <div class="live-preview-wrap">
+        <div class="live-preview-frame">
+          <div class="frame-label">Desktop</div>
+          <div class="live-preview-viewport" style="width:460px;height:288px">
+            <iframe id="preview-desktop" src="/" style="width:1280px;height:800px;transform:scale(0.359375)"></iframe>
+          </div>
+        </div>
+        <div class="live-preview-frame">
+          <div class="frame-label">Mobile</div>
+          <div class="live-preview-viewport" style="width:220px;height:429px">
+            <iframe id="preview-mobile" src="/" style="width:390px;height:760px;transform:scale(0.564)"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <div class="media-grid" id="sitemedia-grid">
+        <p style="opacity:0.6;font-size:0.85rem">Loading…</p>
+      </div>
     </section>
 
-    <!-- ---- Sheets sync ---- -->
-    <section class="panel-section" id="panel-sheets">
-      <h2>Sheets sync</h2>
-      <p style="opacity:0.7;font-size:0.88rem;max-width:60ch">
-        Push sends every product to the Google Sheet as-is (overwrites the sheet's data).
-        Restore compares the sheet against D1 and only adds new rows or updates changed
-        ones — it never deletes a product just because it's missing from the sheet.
-      </p>
-      <div class="toolbar">
-        <button class="btn" id="sheets-push-btn">Push D1 → Sheet</button>
-        <button class="btn secondary" id="sheets-diff-btn">Preview restore diff</button>
+    <!-- ---- Orders ----
+         Placeholder tab only — no backend yet. Needs: an orders table
+         (line items, customer, shipping, payment status), and a real
+         checkout/payment integration (Stripe per the project brief) before
+         this can show real data. Layout below is a rough sketch to build
+         against later, not functional. -->
+    <section class="panel-section" id="panel-orders">
+      <div class="row-between">
+        <h2>Orders</h2>
+        <span class="badge">Coming soon</span>
       </div>
-      <div id="sheets-diff-container"></div>
+      <p style="opacity:0.7;font-size:0.88rem;max-width:70ch;margin-top:-6px">
+        Order management isn't built yet — checkout isn't wired up on the public
+        site (see AGENT_HANDOFF.md). This is a placeholder layout for when it is.
+      </p>
+      <table>
+        <thead>
+          <tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="6" style="text-align:center;opacity:0.5;padding:32px">No orders yet — this tab will populate once checkout is live.</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <!-- ---- Newsletter ---- -->
@@ -317,7 +360,6 @@
   let token = sessionStorage.getItem('admin_token');
   let products = [];
   let editingId = null;
-  let pendingDiff = null;
 
   const $ = (id) => document.getElementById(id);
 
@@ -392,9 +434,10 @@
   function switchPanel(name) {
     document.querySelectorAll('header.top nav button').forEach((b) => b.classList.toggle('active', b.dataset.panel === name));
     document.querySelectorAll('.panel-section').forEach((s) => s.classList.remove('visible'));
-    const map = { list: 'panel-list', form: 'panel-form', health: 'panel-health', sheets: 'panel-sheets', newsletter: 'panel-newsletter' };
+    const map = { list: 'panel-list', form: 'panel-form', sitemedia: 'panel-sitemedia', orders: 'panel-orders', newsletter: 'panel-newsletter' };
     $(map[name]).classList.add('visible');
     if (name === 'newsletter') loadNewsletterSubscribers();
+    if (name === 'sitemedia') loadSiteMedia();
   }
 
   // ---------------- Product list ----------------
@@ -414,7 +457,7 @@
     }
     tbody.innerHTML = products.map((p) => (
       '<tr class="clickable" data-id="' + p.id + '">' +
-        '<td><img src="' + (p.thumb_key ? '/media/' + p.thumb_key : '/assets/marketing/product-placeholder.webp') + '" alt="" style="width:32px;height:32px;border-radius:4px;object-fit:cover;display:block"></td>' +
+        '<td><img src="' + (p.thumb_key ? '/media/' + p.thumb_key : '/media/marketing/product-placeholder.webp') + '" alt="" style="width:32px;height:32px;border-radius:4px;object-fit:cover;display:block"></td>' +
         '<td>' + escapeHtml(p.name) + '</td>' +
         '<td><span class="badge">' + p.category + '</span></td>' +
         '<td>₱' + (p.price_cents / 100).toFixed(2) + '</td>' +
@@ -460,7 +503,7 @@
     $('f-notes').value = p?.flavor_notes || '';
     $('f-description').value = p?.description || '';
     $('f-image-status').textContent = p?.image_key ? ('Current image: ' + p.image_key) : 'No image uploaded yet — showing placeholder.';
-    $('f-image-preview').src = p?.image_key ? ('/media/' + p.image_key) : '/assets/marketing/product-placeholder.webp';
+    $('f-image-preview').src = p?.image_key ? ('/media/' + p.image_key) : '/media/marketing/product-placeholder.webp';
     $('calc-cost').value = '';
     $('calc-price').value = p ? (p.price_cents / 100).toFixed(2) : '';
     updateCalc();
@@ -584,85 +627,63 @@
   $('calc-price').addEventListener('input', updateCalc);
   $('calc-apply-price').addEventListener('click', () => { updateCalc(); showToast('Price field above updated.'); });
 
-  // ---------------- Health check ----------------
+  // ---------------- Site Media ----------------
+  // Fixed-key R2 images used across the public homepage (hero slides,
+  // category tiles, brand-story, product placeholder). Same client-side
+  // resizeToWebp() as product photos; each upload replaces the R2 object
+  // at marketing/{slot}.webp immediately — no D1 row, no "save" step.
 
-  $('run-health-btn').addEventListener('click', async () => {
-    $('health-tbody').innerHTML = '<tr><td colspan="3">Checking…</td></tr>';
-    const res = await api('/admin/health-check', { method: 'POST' });
-    const data = await res.json();
-    if (data.report.length === 0) {
-      $('health-tbody').innerHTML = '<tr><td colspan="3">No products to check.</td></tr>';
-      return;
-    }
-    $('health-tbody').innerHTML = data.report.map((r) => (
-      '<tr>' +
-        '<td><span class="dot ' + (r.ok ? 'ok' : 'bad') + '"></span></td>' +
-        '<td>' + escapeHtml(r.name || r.id) + '</td>' +
-        '<td>' + (r.ok ? 'All good' : r.issues.join(', ')) + '</td>' +
-      '</tr>'
-    )).join('');
-  });
+  let siteMediaSlots = [];
 
-  // ---------------- Sheets sync ----------------
-
-  $('sheets-push-btn').addEventListener('click', async () => {
+  async function loadSiteMedia() {
+    $('sitemedia-grid').innerHTML = '<p style="opacity:0.6;font-size:0.85rem">Loading…</p>';
     try {
-      const res = await api('/admin/sheets/push', { method: 'POST' });
+      const res = await api('/admin/site-media');
       const data = await res.json();
-      showToast('Pushed ' + data.count + ' products to the Sheet.');
+      siteMediaSlots = data.slots || [];
+      renderSiteMediaGrid();
     } catch (err) {
-      showToast('Push failed: ' + err.message);
+      $('sitemedia-grid').innerHTML = '<p style="opacity:0.6;font-size:0.85rem">Failed to load: ' + err.message + '</p>';
     }
-  });
+  }
 
-  $('sheets-diff-btn').addEventListener('click', async () => {
-    const container = $('sheets-diff-container');
-    container.innerHTML = '<p>Comparing…</p>';
-    try {
-      const res = await api('/admin/sheets/diff');
-      const diff = await res.json();
-      pendingDiff = diff;
-      renderDiff(diff);
-    } catch (err) {
-      container.innerHTML = '<p>Diff failed: ' + err.message + '</p>';
-    }
-  });
-
-  function renderDiff(diff) {
-    const container = $('sheets-diff-container');
-    const section = (title, items, renderItem) => (
-      '<div class="diff-list"><h4>' + title + ' (' + items.length + ')</h4>' +
-      (items.length ? '<ul>' + items.map(renderItem).join('') + '</ul>' : '<p style="opacity:0.5;font-size:0.82rem">None</p>') +
+  function renderSiteMediaGrid() {
+    $('sitemedia-grid').innerHTML = siteMediaSlots.map((s) => (
+      '<div class="media-card">' +
+        '<img src="/media/marketing/' + s.slot + '.webp?t=' + Date.now() + '" alt="">' +
+        '<div class="media-label">' + escapeHtml(s.label) + '</div>' +
+        '<div class="media-meta">max ' + s.maxDim + 'px' + (s.uploaded ? ' · updated ' + new Date(s.uploaded).toLocaleDateString() : ' · using default') + '</div>' +
+        '<input type="file" accept="image/*" data-slot="' + s.slot + '" data-maxdim="' + s.maxDim + '" class="sitemedia-input">' +
       '</div>'
-    );
-
-    container.innerHTML =
-      section('Will add (new in Sheet)', diff.added, (r) => '<li>' + escapeHtml(r.name || r.id) + '</li>') +
-      section('Will update (changed)', diff.updated, (r) => '<li>' + escapeHtml(r.sheet.name || r.id) + '</li>') +
-      section('Unchanged', diff.unchanged, (r) => '<li>' + escapeHtml(r.name || r.id) + '</li>') +
-      section('In D1 only — will NOT be touched', diff.d1_only, (r) => '<li>' + escapeHtml(r.name || r.id) + '</li>') +
-      (diff.added.length || diff.updated.length
-        ? '<button class="btn" id="apply-restore-btn">Apply add + update (no deletes)</button>'
-        : '');
-
-    const applyBtn = $('apply-restore-btn');
-    if (applyBtn) applyBtn.addEventListener('click', applyRestore);
-  }
-
-  async function applyRestore() {
-    if (!pendingDiff) return;
-    if (!confirm('Apply ' + pendingDiff.added.length + ' additions and ' + pendingDiff.updated.length + ' updates from the Sheet into D1?')) return;
-    const res = await api('/admin/sheets/restore', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ added: pendingDiff.added, updated: pendingDiff.updated }),
+    )).join('');
+    $('sitemedia-grid').querySelectorAll('.sitemedia-input').forEach((input) => {
+      input.addEventListener('change', () => {
+        if (input.files[0]) uploadSiteMediaSlot(input.dataset.slot, Number(input.dataset.maxdim), input.files[0]);
+      });
     });
-    const data = await res.json();
-    showToast('Restored: ' + data.added + ' added, ' + data.updated + ' updated.');
-    $('sheets-diff-container').innerHTML = '';
-    pendingDiff = null;
-    await loadProducts();
   }
+
+  async function uploadSiteMediaSlot(slot, maxDim, file) {
+    showToast('Uploading…');
+    try {
+      const webp = await resizeToWebp(file, maxDim);
+      await api('/admin/site-media/' + slot, { method: 'POST', headers: { 'Content-Type': 'image/webp' }, body: webp });
+      showToast('Updated.');
+      await loadSiteMedia();
+      refreshLivePreviews();
+    } catch (err) {
+      showToast('Upload failed: ' + err.message);
+    }
+  }
+
+  function refreshLivePreviews() {
+    ['preview-desktop', 'preview-mobile'].forEach((id) => {
+      const frame = $(id);
+      frame.src = '/?t=' + Date.now();
+    });
+  }
+
+  $('sitemedia-refresh-btn').addEventListener('click', () => { loadSiteMedia(); refreshLivePreviews(); });
 
   // ---------------- Newsletter ----------------
 

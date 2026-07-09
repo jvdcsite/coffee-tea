@@ -10,12 +10,16 @@
   popup, footer) are our own build, loosely modeled on how bluebottlecoffee.com
   organizes a homepage — none of their copy, colors, or markup were copied.
 
-  Photography: site/assets/marketing/ has real coffee + tea product photos,
-  processed by scripts/resize-marketing.js (a one-off asset-prep script, not
-  a build step) into hero-1/2/3.webp, category-coffee/tea.webp, and
-  brand-story.webp. Wired into the hero carousel, category tiles, and the
-  brand-story band. Re-run that script if new source photography needs the
-  same crop/compress treatment.
+  Photography: hero slides, category tiles, the brand-story image, and the
+  product placeholder are all admin-customizable — see the "Site Media" tab
+  in admin.html. They're served from R2 at /media/marketing/{slot}.webp
+  (fixed keys, no D1 row), NOT from site/assets/marketing/ as static files
+  — that folder only holds the *original* processed defaults (produced by
+  scripts/resize-marketing.js, a one-off asset-prep script, not a build
+  step) which were seeded into R2 once so the site works out of the box.
+  Editing a file in site/assets/marketing/ and redeploying does nothing to
+  the live images anymore; use the admin tab, or reseed R2 via `wrangler r2
+  object put coffee-tea-media/marketing/{slot}.webp --file=... --remote`.
 -->
 <html lang="en">
 <head>
@@ -41,6 +45,11 @@
     --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'DM Sans', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
+
+    /* Horizontal breathing room, used by .wrap and the hero slide content.
+       Scales with viewport so it's never flush against the edge on either
+       mobile or a wide desktop window. */
+    --gutter: clamp(28px, 5vw, 64px);
   }
 
   * { box-sizing: border-box; }
@@ -58,7 +67,7 @@
   }
   a { color: inherit; text-decoration: none; }
   button { font-family: inherit; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 var(--gutter); }
   .eyebrow {
     font-family: var(--font-mono);
     font-size: 0.72rem;
@@ -104,7 +113,7 @@
     color: var(--paper);
   }
   .utility-bar .wrap {
-    padding: 8px 24px;
+    padding: 8px var(--gutter);
     text-align: center;
     font-family: var(--font-mono);
     font-size: 0.72rem;
@@ -124,10 +133,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 22px 24px;
+    padding: 22px var(--gutter);
     transition: padding 0.2s ease;
   }
-  .site-nav.scrolled .nav-inner { padding: 12px 24px; }
+  .site-nav.scrolled .nav-inner { padding: 12px var(--gutter); }
   .brand {
     font-family: var(--font-display);
     font-size: 1.4rem;
@@ -238,18 +247,18 @@
   .hero-slide.active { opacity: 1; visibility: visible; }
   .hero-slide .slide-bg { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: center; }
   .hero-slide[data-slide="0"] .slide-bg {
-    background-image: linear-gradient(rgba(22,40,59,0.55), rgba(22,40,59,0.55)), url('/assets/marketing/hero-1.webp');
+    background-image: linear-gradient(rgba(22,40,59,0.55), rgba(22,40,59,0.55)), url('/media/marketing/hero-1.webp');
   }
   .hero-slide[data-slide="1"] .slide-bg {
-    background-image: linear-gradient(rgba(122,90,27,0.55), rgba(122,90,27,0.55)), url('/assets/marketing/hero-2.webp');
+    background-image: linear-gradient(rgba(122,90,27,0.55), rgba(122,90,27,0.55)), url('/media/marketing/hero-2.webp');
   }
   .hero-slide[data-slide="2"] .slide-bg {
-    background-image: linear-gradient(rgba(29,27,23,0.55), rgba(29,27,23,0.55)), url('/assets/marketing/hero-3.webp');
+    background-image: linear-gradient(rgba(29,27,23,0.55), rgba(29,27,23,0.55)), url('/media/marketing/hero-3.webp');
   }
   .slide-content {
     position: relative; z-index: 1;
     max-width: 540px;
-    padding: 0 max(24px, calc((100% - 1180px) / 2 + 24px));
+    padding: 0 max(var(--gutter), calc((100% - 1180px) / 2 + var(--gutter)));
     color: var(--paper);
   }
   .slide-content h1 {
@@ -437,12 +446,12 @@
   .category-tile:hover { transform: translateY(-3px); }
   .category-tile:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   .category-tile.coffee {
-    background-image: linear-gradient(rgba(22,40,59,0.72), rgba(22,40,59,0.72)), url('/assets/marketing/category-coffee.webp');
+    background-image: linear-gradient(rgba(22,40,59,0.72), rgba(22,40,59,0.72)), url('/media/marketing/category-coffee.webp');
     background-size: cover;
     background-position: center;
   }
   .category-tile.tea {
-    background-image: linear-gradient(rgba(122,90,27,0.72), rgba(122,90,27,0.72)), url('/assets/marketing/category-tea.webp');
+    background-image: linear-gradient(rgba(122,90,27,0.72), rgba(122,90,27,0.72)), url('/media/marketing/category-tea.webp');
     background-size: cover;
     background-position: center;
   }
@@ -731,7 +740,7 @@
   <section class="section story-band fade-section">
     <div class="wrap story-inner">
       <div class="story-media">
-        <img src="/assets/marketing/brand-story.webp" alt="" loading="lazy">
+        <img src="/media/marketing/brand-story.webp" alt="" loading="lazy">
       </div>
       <div class="story-copy">
         <span class="eyebrow">Our approach</span>
@@ -958,7 +967,7 @@
         '<div class="swatch">' +
           '<span class="tag">' + p.category + '</span>' +
           (badge ? '<span class="badge ' + badge.cls + '">' + badge.label + '</span>' : '') +
-          '<img loading="lazy" src="' + (p.thumb_key ? '/media/' + p.thumb_key : '/assets/marketing/product-placeholder.webp') + '" alt="' + escapeHtml(p.name) + '">' +
+          '<img loading="lazy" src="' + (p.thumb_key ? '/media/' + p.thumb_key : '/media/marketing/product-placeholder.webp') + '" alt="' + escapeHtml(p.name) + '">' +
         '</div>' +
         '<div class="body">' +
           '<h3>' + escapeHtml(p.name) + '</h3>' +
@@ -1165,7 +1174,7 @@
     const isTea = featured.category === 'tea';
     wrap.innerHTML =
       '<div class="featured-media' + (isTea ? ' tea' : '') + '">' +
-        '<img style="width:100%;height:100%;object-fit:cover;border-radius:10px" src="' + (featured.image_key ? '/media/' + featured.image_key : '/assets/marketing/product-placeholder.webp') + '" alt="' + escapeHtml(featured.name) + '">' +
+        '<img style="width:100%;height:100%;object-fit:cover;border-radius:10px" src="' + (featured.image_key ? '/media/' + featured.image_key : '/media/marketing/product-placeholder.webp') + '" alt="' + escapeHtml(featured.name) + '">' +
       '</div>' +
       '<div class="featured-copy">' +
         '<span class="eyebrow">Featured</span>' +
@@ -1195,7 +1204,7 @@
     }
     const isTea = p.category === 'tea';
     $('product-media').className = 'product-media' + (isTea ? ' tea' : '');
-    $('product-media').innerHTML = '<img src="' + (p.image_key ? '/media/' + p.image_key : '/assets/marketing/product-placeholder.webp') + '" alt="' + escapeHtml(p.name) + '">';
+    $('product-media').innerHTML = '<img src="' + (p.image_key ? '/media/' + p.image_key : '/media/marketing/product-placeholder.webp') + '" alt="' + escapeHtml(p.name) + '">';
     $('product-category-tag').textContent = p.category;
     $('product-name').textContent = p.name;
     $('product-origin').textContent = p.origin || '';

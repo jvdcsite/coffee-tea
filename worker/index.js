@@ -21,6 +21,12 @@
  *   POST   /api/newsletter/subscribe        add an email to the list           (public)
  *   GET    /api/admin/newsletter/subscribers list subscribers                  [auth]
  *   DELETE /api/admin/newsletter/subscribers/:email  remove a subscriber       [auth]
+ *   GET    /api/admin/site-media            status of every homepage image slot [auth]
+ *   POST   /api/admin/site-media/:slot      replace a homepage image slot       [auth]
+ *          (slots: hero-1, hero-2, hero-3, category-coffee, category-tea,
+ *          brand-story, product-placeholder — see SITE_MEDIA_SLOTS below.
+ *          Publicly served at /media/marketing/{slot}.webp, same R2 proxy
+ *          serveMedia() already uses for product photos.)
  *
  * Required secrets (wrangler secret put <NAME>):
  *   ADMIN_USERNAME        plain username for the single admin account
@@ -32,6 +38,24 @@
  */
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
+
+// Fixed set of homepage image slots an admin can customize. Each is stored
+// in R2 at marketing/{slot}.webp and served publicly via the existing
+// /media/* proxy — the same mechanism product photos use, just a fixed key
+// instead of one keyed by product id. Adding a slot here + wiring the CSS
+// url() or <img src> to /media/marketing/{slot}.webp in site/index.html is
+// the whole integration; no D1 table needed since the "current" image is
+// just whatever R2 object currently lives at that key.
+const SITE_MEDIA_SLOTS = [
+  { slot: "hero-1", label: "Hero slide 1 (Coffee)", maxDim: 1600 },
+  { slot: "hero-2", label: "Hero slide 2 (Tea)", maxDim: 1600 },
+  { slot: "hero-3", label: "Hero slide 3 (Best sellers)", maxDim: 1600 },
+  { slot: "category-coffee", label: "Category tile — Coffee", maxDim: 800 },
+  { slot: "category-tea", label: "Category tile — Tea", maxDim: 800 },
+  { slot: "brand-story", label: "Brand story image", maxDim: 1200 },
+  { slot: "product-placeholder", label: "Product placeholder (no-photo fallback)", maxDim: 800 },
+];
+const SITE_MEDIA_SLOT_KEYS = new Set(SITE_MEDIA_SLOTS.map((s) => s.slot));
 
 export default {
   async fetch(request, env, ctx) {
@@ -118,6 +142,13 @@ async function routeApi(request, env, url) {
   if (method === "DELETE" && pathname.startsWith("/api/admin/newsletter/subscribers/")) {
     const email = decodeURIComponent(pathname.slice("/api/admin/newsletter/subscribers/".length));
     return deleteNewsletterSubscriber(env, email);
+  }
+  if (method === "GET" && pathname === "/api/admin/site-media") {
+    return listSiteMedia(env);
+  }
+  if (method === "POST" && /^\/api\/admin\/site-media\/[\w-]+$/.test(pathname)) {
+    const slot = pathname.split("/").pop();
+    return uploadSiteMedia(request, env, slot);
   }
 
   return json({ error: "Not found" }, 404);
@@ -484,6 +515,41 @@ async function getNewsletterSubscribers(env) {
 async function deleteNewsletterSubscriber(env, email) {
   await env.DB.prepare("DELETE FROM newsletter_subscribers WHERE email = ?").bind(email).run();
   return json({ ok: true });
+}
+
+// ---------------------------------------------------------------------------
+// Site media — admin-customizable homepage images (hero, category tiles,
+// brand story, product placeholder). Fixed R2 keys, no D1 row involved.
+// ---------------------------------------------------------------------------
+
+async function listSiteMedia(env) {
+  const slots = await Promise.all(
+    SITE_MEDIA_SLOTS.map(async (def) => {
+      const key = `marketing/${def.slot}.webp`;
+      const head = await env.MEDIA.head(key);
+      return {
+        slot: def.slot,
+        label: def.label,
+        maxDim: def.maxDim,
+        key,
+        exists: !!head,
+        uploaded: head ? head.uploaded : null,
+        size: head ? head.size : null,
+      };
+    })
+  );
+  return json({ slots });
+}
+
+async function uploadSiteMedia(request, env, slot) {
+  if (!SITE_MEDIA_SLOT_KEYS.has(slot)) {
+    return json({ error: "Unknown slot: " + slot }, 400);
+  }
+  const key = `marketing/${slot}.webp`;
+  await env.MEDIA.put(key, request.body, {
+    httpMetadata: { contentType: "image/webp" },
+  });
+  return json({ key });
 }
 
 // ---------------------------------------------------------------------------

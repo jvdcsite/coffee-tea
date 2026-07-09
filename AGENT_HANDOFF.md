@@ -20,13 +20,68 @@ Resources created and wired into `wrangler.jsonc`:
 - **Production:** https://coffee-tea-site.johncolastre.workers.dev
 - **Staging:** https://coffee-tea-site-staging.johncolastre.workers.dev
 - Both are in sync as of this writing (redesign + currency/font/photo pass
-  below, all deployed to both). Production and staging share the *same* D1
-  database and R2 bucket (see `wrangler.jsonc` — same `database_id` and
-  `bucket_name` under both the top-level config and `env.staging`), so any
-  data change (product edits, image uploads, newsletter signups) is
-  instantly visible on both regardless of which URL you're looking at.
-  Only the *code* (Worker + static assets) can drift between them — that's
-  the only thing `deploy:staging` vs `deploy:prod` actually controls.
+  + admin restructure below, all deployed to both). Production and staging
+  share the *same* D1 database and R2 bucket (see `wrangler.jsonc` — same
+  `database_id` and `bucket_name` under both the top-level config and
+  `env.staging`), so any data change (product edits, image uploads,
+  newsletter signups, site media) is instantly visible on both regardless
+  of which URL you're looking at. Only the *code* (Worker + static assets)
+  can drift between them — that's the only thing `deploy:staging` vs
+  `deploy:prod` actually controls.
+
+## Admin restructure: Site Media, Orders, and the removal of Health Check / Sheets sync
+
+- **Removed from the admin nav (UI only):** Health Check and Sheets sync
+  tabs. The *backend* routes (`/api/admin/health-check`,
+  `/api/admin/sheets/*`) are still in `worker/index.js`, just unreferenced
+  by any UI — re-add nav buttons + panel sections if this project ever
+  wants them back (the JS logic wasn't deleted from git history, just from
+  the live file — check the commit before this one).
+- **Added "Orders" tab:** layout-only placeholder (a table skeleton with an
+  empty state), no backend. Needs: an `orders` table (line items, customer,
+  shipping, payment status) and a real checkout integration (Stripe, per
+  the payment brief in `ARCHITECTURE.md` §10) before this can show
+  anything real.
+- **Added "Site Media" tab:** lets the admin replace every homepage image
+  (3 hero slides, 2 category tiles, brand-story, and the product
+  placeholder) without a redeploy. Two-part UI: live `<iframe>` previews of
+  the actual homepage at desktop (1280px, scaled to fit) and mobile
+  (390px, scaled to fit) widths with a Refresh button, plus a card grid —
+  one per slot — showing the current image, a "max Npx" hint, last-updated
+  date, and a file input that uploads immediately on selection (no
+  separate save step).
+
+### How Site Media actually works (read this before touching it)
+
+This did **not** get a new D1 table. Each image "slot" (`hero-1`, `hero-2`,
+`hero-3`, `category-coffee`, `category-tea`, `brand-story`,
+`product-placeholder` — the fixed list is `SITE_MEDIA_SLOTS` in
+`worker/index.js`) is just an R2 object at a **fixed key**:
+`marketing/{slot}.webp`. Uploading through the admin tab
+(`POST /api/admin/site-media/:slot`) overwrites that R2 object directly;
+there's no "current value" stored anywhere except R2 itself, which is also
+why `GET /api/admin/site-media` HEAD-checks each key instead of reading a
+table. The public site's CSS/HTML references `/media/marketing/{slot}.webp`
+directly (that's the existing `serveMedia()` R2 proxy, same one product
+photos already used at `/media/images/...`).
+
+**This is a real behavior change from before:** `site/index.html` used to
+reference `/assets/marketing/*.webp` as static files bundled with the
+deploy. It now reads everything from R2 instead. `site/assets/marketing/`
+still exists in the repo but is now just the *original source* the site
+was seeded from (via `scripts/resize-marketing.js` + a one-time
+`wrangler r2 object put ... --remote` per file) — **editing those files
+and redeploying does nothing** to the live site anymore. If R2 is ever
+wiped or a fresh environment is stood up, reseed it with:
+
+```
+for slot in hero-1 hero-2 hero-3 category-coffee category-tea brand-story product-placeholder; do
+  wrangler r2 object put "coffee-tea-media/marketing/${slot}.webp" \
+    --file="site/assets/marketing/${slot}.webp" --content-type=image/webp --remote
+done
+```
+
+(drop `--remote` to seed the local dev bucket instead.)
 
 **Not yet done:** `SHEETS_WEBHOOK_URL` / `TURNSTILE_SECRET_KEY` secrets
 (Sheets sync and Turnstile untested), real branding (name/copy), custom
@@ -219,6 +274,8 @@ history on a different branch). Initialized a fresh repo scoped to
   since every `/api/admin/*` call requires a valid session token). Fine for
   now; if the client wants the admin URL itself hidden, consider Cloudflare
   Access in front of `/admin.html` as a follow-up, not a blocker for launch.
+- **Order management.** The admin "Orders" tab is layout-only — see the
+  Site Media/Orders section above for what it actually needs.
 
 ## Known gotchas
 
