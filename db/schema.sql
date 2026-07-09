@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS products (
   flavor_notes  TEXT,                      -- free text, comma-separated tasting notes
   description   TEXT,
   price_cents   INTEGER NOT NULL,          -- store money as integer cents, never floats
-  currency      TEXT NOT NULL DEFAULT 'USD',
+  currency      TEXT NOT NULL DEFAULT 'PHP',
   stock_count   INTEGER NOT NULL DEFAULT 0,
   weight_grams  INTEGER,                   -- for shipping calculations later
   image_key     TEXT,                      -- R2 key, e.g. images/{id}.webp
@@ -45,12 +45,14 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
 
 -- Sample rows so the site and admin dashboard have something to render
 -- against right away. Safe to delete once real products are added.
+-- Prices are in PHP (pesos), sized to be plausible for the Philippine
+-- specialty coffee/tea market, not just the old USD cents relabeled.
 INSERT OR IGNORE INTO products
-  (id, category, name, origin, process, roast_level, altitude_m, flavor_notes, description, price_cents, stock_count, weight_grams, active)
+  (id, category, name, origin, process, roast_level, altitude_m, flavor_notes, description, price_cents, currency, stock_count, weight_grams, active)
 VALUES
   ('sample-coffee-1', 'coffee', 'Yirgacheffe Sample Lot', 'Yirgacheffe, Ethiopia', 'washed', 'light', 1900,
    'jasmine, bergamot, stone fruit', 'A bright, floral single-origin. Placeholder copy — replace with the client''s real description.',
-   1900, 24, 340, 1),
+   65000, 'PHP', 24, 340, 1),
   ('sample-tea-1', 'tea', 'High Mountain Oolong Sample', 'Nantou, Taiwan', 'partially oxidized', NULL, 1200,
    'orchid, toasted rice, honey', 'A gently oxidized oolong. Placeholder copy — replace with the client''s real description.',
-   1600, 15, 100, 1);
+   55000, 'PHP', 15, 100, 1);

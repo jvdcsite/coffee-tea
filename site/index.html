@@ -10,12 +10,12 @@
   popup, footer) are our own build, loosely modeled on how bluebottlecoffee.com
   organizes a homepage — none of their copy, colors, or markup were copied.
 
-  Photography: site/assets/marketing/ has real coffee product photos, used
-  in the coffee hero slide, the best-sellers hero slide, and the Coffee
-  category tile. No tea photography exists yet, so the tea hero slide and
-  Tea category tile still use the gradient placeholder — swap those in
-  site/assets/marketing/ + the two `.hero-slide[data-slide="1"]` /
-  `.category-tile.tea` CSS rules once tea photos are available.
+  Photography: site/assets/marketing/ has real coffee + tea product photos,
+  processed by scripts/resize-marketing.js (a one-off asset-prep script, not
+  a build step) into hero-1/2/3.webp, category-coffee/tea.webp, and
+  brand-story.webp. Wired into the hero carousel, category tiles, and the
+  brand-story band. Re-run that script if new source photography needs the
+  same crop/compress treatment.
 -->
 <html lang="en">
 <head>
@@ -25,7 +25,7 @@
 <meta name="description" content="Small-batch coffee and tea, sourced by origin and roasted or steeped with the details that matter.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root {
     /* "Cream & Cobalt" palette — the only place color is defined. */
@@ -38,8 +38,8 @@
     --tea-deep: #7A5A1B;
     --line: rgba(29, 27, 23, 0.14);
 
-    --font-display: 'Fraunces', serif;
-    --font-body: 'Inter', sans-serif;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
   }
 
@@ -238,11 +238,13 @@
   .hero-slide.active { opacity: 1; visibility: visible; }
   .hero-slide .slide-bg { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: center; }
   .hero-slide[data-slide="0"] .slide-bg {
-    background-image: linear-gradient(rgba(22,40,59,0.55), rgba(22,40,59,0.55)), url('/assets/marketing/80D2FF3E-9A17-4A6B-B0A3-4AEFF7D809C4.png');
+    background-image: linear-gradient(rgba(22,40,59,0.55), rgba(22,40,59,0.55)), url('/assets/marketing/hero-1.webp');
   }
-  .hero-slide[data-slide="1"] .slide-bg { background: linear-gradient(135deg, var(--tea), var(--tea-deep)); }
+  .hero-slide[data-slide="1"] .slide-bg {
+    background-image: linear-gradient(rgba(122,90,27,0.55), rgba(122,90,27,0.55)), url('/assets/marketing/hero-2.webp');
+  }
   .hero-slide[data-slide="2"] .slide-bg {
-    background-image: linear-gradient(rgba(29,27,23,0.55), rgba(29,27,23,0.55)), url('/assets/marketing/BCAD31E8-C341-4FFE-A710-2EB7126DB09F.png');
+    background-image: linear-gradient(rgba(29,27,23,0.55), rgba(29,27,23,0.55)), url('/assets/marketing/hero-3.webp');
   }
   .slide-content {
     position: relative; z-index: 1;
@@ -435,18 +437,35 @@
   .category-tile:hover { transform: translateY(-3px); }
   .category-tile:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   .category-tile.coffee {
-    background-image: linear-gradient(rgba(22,40,59,0.72), rgba(22,40,59,0.72)), url('/assets/marketing/C3A5193D-89A9-4666-9E38-CED20809C9B4.png');
+    background-image: linear-gradient(rgba(22,40,59,0.72), rgba(22,40,59,0.72)), url('/assets/marketing/category-coffee.webp');
     background-size: cover;
     background-position: center;
   }
-  .category-tile.tea { background: linear-gradient(135deg, var(--tea), var(--tea-deep)); }
+  .category-tile.tea {
+    background-image: linear-gradient(rgba(122,90,27,0.72), rgba(122,90,27,0.72)), url('/assets/marketing/category-tea.webp');
+    background-size: cover;
+    background-position: center;
+  }
   .tile-label { font-family: var(--font-display); font-size: 1.4rem; font-weight: 500; }
   .tile-sub { font-size: 0.85rem; opacity: 0.85; }
   @media (max-width: 640px) { .tile-grid { grid-template-columns: 1fr; } }
 
   /* ---------- Brand story ---------- */
-  .story-band .story-inner { max-width: 68ch; text-align: center; margin: 0 auto; }
+  .story-band { background: var(--paper-raised); }
+  .story-band .story-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .story-media { border-radius: 10px; overflow: hidden; }
+  .story-media img { width: 100%; height: 100%; max-height: 400px; object-fit: cover; display: block; }
+  .story-copy { max-width: 46ch; }
   .story-band p { font-family: var(--font-display); font-size: clamp(1.1rem, 2vw, 1.4rem); line-height: 1.5; margin: 0; }
+  @media (max-width: 860px) {
+    .story-band .story-inner { grid-template-columns: 1fr; }
+    .story-media img { max-height: 260px; }
+  }
 
   /* ---------- Placeholder sections (Subscriptions / Find Us) ---------- */
   .placeholder-section { background: var(--paper-raised); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -637,8 +656,8 @@
       <div class="slide-bg"></div>
       <div class="slide-content">
         <span class="eyebrow" style="opacity:0.85">Roasted in small batches</span>
-        <h1>Coffee, tracked back to the farm it came from.</h1>
-        <p>Origin, altitude, and process on every bag — because the details change how it tastes.</p>
+        <h1>Small batches, honest sourcing.</h1>
+        <p>Origin, altitude, and process on every bag, because the details change how it tastes.</p>
         <button class="btn-primary" data-goto="coffee">Shop coffee</button>
       </div>
     </div>
@@ -711,9 +730,14 @@
 
   <section class="section story-band fade-section">
     <div class="wrap story-inner">
-      <span class="eyebrow">Our approach</span>
-      <!-- Placeholder copy — replace with the client's real sourcing/roasting story once discovery-form answers are in. -->
-      <p>We work directly with a small number of farms and gardens, paying for quality and traceability first — every bag and tin carries the origin, altitude, and process behind it, because we think that context is part of what you're buying.</p>
+      <div class="story-media">
+        <img src="/assets/marketing/brand-story.webp" alt="" loading="lazy">
+      </div>
+      <div class="story-copy">
+        <span class="eyebrow">Our approach</span>
+        <!-- Placeholder copy — replace with the client's real sourcing/roasting story once discovery-form answers are in. -->
+        <p>We work directly with a small number of farms and gardens, paying for quality and traceability first — every bag and tin carries the origin, altitude, and process behind it, because we think that context is part of what you're buying.</p>
+      </div>
     </div>
   </section>
 

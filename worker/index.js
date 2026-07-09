@@ -224,7 +224,7 @@ async function createProduct(request, env) {
       id, p.category, p.name, p.origin ?? null, p.process ?? null,
       p.roast_level ?? null, p.leaf_type ?? null, p.caffeine_level ?? null,
       p.altitude_m ?? null, p.flavor_notes ?? null, p.description ?? null,
-      p.price_cents, p.currency ?? "USD", p.stock_count ?? 0,
+      p.price_cents, p.currency ?? "PHP", p.stock_count ?? 0,
       p.weight_grams ?? null, p.image_key ?? null, p.thumb_key ?? null,
       p.active ?? 1
     )
@@ -250,7 +250,7 @@ async function updateProduct(request, env, id) {
       p.category, p.name, p.origin ?? null, p.process ?? null,
       p.roast_level ?? null, p.leaf_type ?? null, p.caffeine_level ?? null,
       p.altitude_m ?? null, p.flavor_notes ?? null, p.description ?? null,
-      p.price_cents, p.currency ?? "USD", p.stock_count ?? 0,
+      p.price_cents, p.currency ?? "PHP", p.stock_count ?? 0,
       p.weight_grams ?? null, p.image_key ?? null, p.thumb_key ?? null,
       p.active ?? 1, id
     )
@@ -283,6 +283,15 @@ async function uploadMedia(request, env) {
   await env.MEDIA.put(key, request.body, {
     httpMetadata: { contentType: "image/webp" },
   });
+
+  // The R2 put alone doesn't make the image show up anywhere — the public
+  // site and admin health-check both read image_key/thumb_key off the D1
+  // row, not off R2 directly. Persist it here so callers don't have to
+  // remember to issue a separate PUT /admin/products/:id afterward.
+  const column = variant === "thumb" ? "thumb_key" : "image_key";
+  await env.DB.prepare(`UPDATE products SET ${column} = ?, updated_at = datetime('now') WHERE id = ?`)
+    .bind(key, productId)
+    .run();
 
   return json({ key });
 }
@@ -413,7 +422,7 @@ async function createProductFromRow(env, row) {
       row.id, row.category, row.name, row.origin ?? null, row.process ?? null,
       row.roast_level ?? null, row.leaf_type ?? null, row.caffeine_level ?? null,
       row.altitude_m ?? null, row.flavor_notes ?? null, row.description ?? null,
-      row.price_cents, row.currency ?? "USD", row.stock_count ?? 0,
+      row.price_cents, row.currency ?? "PHP", row.stock_count ?? 0,
       row.weight_grams ?? null, row.image_key ?? null, row.thumb_key ?? null,
       row.active ?? 1
     )
@@ -434,7 +443,7 @@ async function updateProductFromRow(env, id, row) {
       row.category, row.name, row.origin ?? null, row.process ?? null,
       row.roast_level ?? null, row.leaf_type ?? null, row.caffeine_level ?? null,
       row.altitude_m ?? null, row.flavor_notes ?? null, row.description ?? null,
-      row.price_cents, row.currency ?? "USD", row.stock_count ?? 0,
+      row.price_cents, row.currency ?? "PHP", row.stock_count ?? 0,
       row.weight_grams ?? null, row.image_key ?? null, row.thumb_key ?? null,
       row.active ?? 1, id
     )

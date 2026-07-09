@@ -17,14 +17,70 @@ Resources created and wired into `wrangler.jsonc`:
 - `ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH` secrets set on both the
   production and `staging` Worker environments (username `admin`; password
   was chosen directly by the client — not recorded here).
-- **Production:** https://coffee-tea-site.johncolastre.workers.dev — running
-  the current homepage redesign (deployed with explicit go-ahead).
-- **Staging:** https://coffee-tea-site-staging.johncolastre.workers.dev —
-  same redesign, verified end-to-end first.
+- **Production:** https://coffee-tea-site.johncolastre.workers.dev
+- **Staging:** https://coffee-tea-site-staging.johncolastre.workers.dev
+- Both currently on the homepage redesign — check with the client whether
+  the font/copy/currency pass below has also gone to production before
+  assuming they're in sync; see git log for the actual deploy history.
 
 **Not yet done:** `SHEETS_WEBHOOK_URL` / `TURNSTILE_SECRET_KEY` secrets
-(Sheets sync and Turnstile untested), real branding (name/copy), tea
-photography, custom domain. See "Suggested next steps" below.
+(Sheets sync and Turnstile untested), real branding (name/copy), custom
+domain. See "Suggested next steps" below.
+
+## Currency: PHP (Philippine pesos)
+
+Switched from USD. `products.currency` defaults to `'PHP'` in
+`db/schema.sql`, the Worker's create/update fallback is `"PHP"`
+(`worker/index.js`), and the sample rows were re-priced to plausible PHP
+amounts (₱650 / ₱550) rather than just relabeling the old USD cents value —
+run the `UPDATE products SET currency = ..., price_cents = ...` pattern
+from this session's history if more legacy USD rows ever need migrating.
+The public site's price formatting (`Intl.NumberFormat` keyed off each
+product's own `currency` field) needed no change — it already displays
+whatever currency is stored per-row. `admin.html` had a few hardcoded `$`
+symbols (product table, margin calculator) that were swapped to `₱`.
+
+## Fonts: "Geometric Warm" pairing
+
+`--font-display: 'Space Grotesk'`, `--font-body: 'DM Sans'`,
+`--font-mono` unchanged (`'IBM Plex Mono'`). Replaced the old
+Fraunces/Inter pairing in both `site/index.html` and `site/admin.html`.
+
+## Marketing photography pipeline
+
+`site/assets/marketing/` now holds only the **processed** deliverables —
+`hero-1/2/3.webp`, `category-coffee.webp`, `category-tea.webp`,
+`brand-story.webp` — wired into the hero carousel, category tiles, and a
+newly two-column brand-story band (it used to be text-only). The **raw**
+source photos (2MB+ PNGs, UUID-named) were deleted after processing; they
+shouldn't be re-added to `site/` since everything in there gets deployed as
+a static asset. `scripts/resize-marketing.js` is the one-off tool that did
+the crop/compress (`sharp`, added as a devDependency — not part of the
+Worker bundle or a build step, just asset prep). Re-run it if new source
+photography needs the same treatment; it expects the same UUID-named PNGs
+in `site/assets/marketing/` and is *not* idempotent-safe against renamed
+inputs, so check the `jobs` array before rerunning.
+
+Two more images showed up in that folder later — blank/unbranded packaging
+mockups (a stand-up pouch and a box). Left untouched, not wired into
+anything: they're not lifestyle photography and have no label, so they
+don't fit the hero/category/story slots or work as product photos. Likely
+useful once real branding exists to composite a logo onto.
+
+## Product photos: real upload flow + a bug fix
+
+Uploaded via the actual admin UI flow (`resizeToWebp()` client-side →
+`POST /api/admin/upload`), not a new script — per the constraint that
+individual product photos must go through the same path a human admin
+would use. In the process, found and fixed a real bug that predates this
+session: **`uploadMedia()` in `worker/index.js` was writing the file to R2
+but never updating the product's `image_key`/`thumb_key` columns in D1** —
+so an uploaded image would sit in R2 forever invisible to the public site
+and the health-check panel, which both read those columns, not R2 directly.
+Fixed by having `uploadMedia()` run an `UPDATE products SET image_key = ...
+WHERE id = ...` (or `thumb_key` for the thumb variant) right after the R2
+`put()` succeeds. Both sample products now have real photos with
+`image_key`/`thumb_key` set and pass Health Check.
 
 ## Homepage redesign (site/index.html + site/admin.html)
 
@@ -166,15 +222,19 @@ history on a different branch). Initialized a fresh repo scoped to
 3. ~~Deploy the initial (pre-redesign) build to production~~ — done.
 4. ~~Homepage redesign + newsletter capture~~ — done.
 5. ~~Deploy the redesign to production~~ — done, with explicit go-ahead.
-6. Get tea product photography (coffee photography already exists in
-   `site/assets/marketing/`); get the client discovery-form answers back to
-   update brand name/copy.
-7. Wire a real email provider for the Newsletter "Send" button, if the
+6. ~~Currency to PHP, font pairing, hero copy, marketing photo pipeline,
+   product photo uploads~~ — done, see the sections above. Confirm with the
+   client whether this pass also needs to go to production (check
+   `git log` / actually load both URLs — don't assume from this doc alone).
+7. Get the client discovery-form answers back to update brand name/copy —
+   "Ember & Leaf" is still a placeholder even though currency/fonts/photos
+   are now real decisions.
+9. Wire a real email provider for the Newsletter "Send" button, if the
    client wants in-house sending rather than exporting the CSV into
    something like Mailchimp.
-8. Deploy the Apps Script Web App, set `SHEETS_WEBHOOK_URL`, test push/diff/
-   restore against a real Sheet.
-9. Confirm with the client whether checkout is in scope for launch before
-   building anything payment-related.
-10. Connect the real domain once it's decided whether it stays on Namecheap
+10. Deploy the Apps Script Web App, set `SHEETS_WEBHOOK_URL`, test
+    push/diff/restore against a real Sheet.
+11. Confirm with the client whether checkout is in scope for launch before
+    building anything payment-related.
+12. Connect the real domain once it's decided whether it stays on Namecheap
     (DNS-only, pointed at Cloudflare) or moves to Cloudflare Registrar.

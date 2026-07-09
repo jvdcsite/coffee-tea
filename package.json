@@ -10,6 +10,7 @@
     "db:init:remote": "wrangler d1 execute coffee-tea-db --file=./db/schema.sql --remote"
   },
   "devDependencies": {
+    "sharp": "^0.35.3",
     "wrangler": "^4.0.0"
   }
 }
