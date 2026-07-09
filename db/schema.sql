@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 
 -- Newsletter email capture (the popup on the public site writes here).
--- Sending campaigns is NOT wired up — that needs an email provider (e.g.
+-- Sending campaigns is NOT wired up; that needs an email provider (e.g.
 -- Resend, Mailchannels) added as a secret + a send route. This table is
 -- just the capture + list side, which is real today.
 CREATE TABLE IF NOT EXISTS newsletter_subscribers (
@@ -51,8 +51,8 @@ INSERT OR IGNORE INTO products
   (id, category, name, origin, process, roast_level, altitude_m, flavor_notes, description, price_cents, currency, stock_count, weight_grams, active)
 VALUES
   ('sample-coffee-1', 'coffee', 'Yirgacheffe Sample Lot', 'Yirgacheffe, Ethiopia', 'washed', 'light', 1900,
-   'jasmine, bergamot, stone fruit', 'A bright, floral single-origin. Placeholder copy — replace with the client''s real description.',
+   'jasmine, bergamot, stone fruit', 'A bright, floral single-origin. Placeholder copy, replace with the client''s real description.',
    65000, 'PHP', 24, 340, 1),
   ('sample-tea-1', 'tea', 'High Mountain Oolong Sample', 'Nantou, Taiwan', 'partially oxidized', NULL, 1200,
-   'orchid, toasted rice, honey', 'A gently oxidized oolong. Placeholder copy — replace with the client''s real description.',
+   'orchid, toasted rice, honey', 'A gently oxidized oolong. Placeholder copy, replace with the client''s real description.',
    55000, 'PHP', 15, 100, 1);

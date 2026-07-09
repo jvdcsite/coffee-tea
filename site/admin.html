@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — Ember & Leaf</title>
+<title>Admin | Ember & Leaf</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root {
-    /* "Cream & Cobalt" palette — matches site/index.html. */
+    /* "Cream & Cobalt" palette: matches site/index.html. */
     --ink: #1D1B17;
     --paper: #F3EEE3;
     --paper-raised: #ffffff;
@@ -62,6 +62,7 @@
     cursor: pointer;
     background: var(--ink);
     color: var(--paper);
+    text-decoration: none;
   }
   .btn:hover { opacity: 0.9; }
   .btn.secondary { background: transparent; color: var(--ink); border: 1px solid var(--line); }
@@ -168,14 +169,17 @@
 <!-- ================= DASHBOARD ================= -->
 <div id="dashboard">
   <header class="top">
-    <h1 style="font-size:1.1rem">Ember &amp; Leaf — Admin</h1>
+    <h1 style="font-size:1.1rem">Ember &amp; Leaf | Admin</h1>
     <nav>
       <button class="active" data-panel="list">Products</button>
       <button data-panel="sitemedia">Site Media</button>
       <button data-panel="orders">Orders</button>
       <button data-panel="newsletter">Newsletter</button>
     </nav>
-    <button class="btn secondary" id="logout-btn">Log out</button>
+    <div style="display:flex;gap:10px">
+      <a class="btn secondary" href="/" target="_blank" rel="noopener">View site &#8599;</a>
+      <button class="btn secondary" id="logout-btn">Log out</button>
+    </div>
   </header>
 
   <main class="content">
@@ -188,10 +192,10 @@
       </div>
       <table>
         <thead>
-          <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Active</th></tr>
+          <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Active</th><th></th></tr>
         </thead>
         <tbody id="products-tbody">
-          <tr><td colspan="6">Loading…</td></tr>
+          <tr><td colspan="7">Loading…</td></tr>
         </tbody>
       </table>
     </section>
@@ -200,7 +204,10 @@
     <section class="panel-section" id="panel-form">
       <div class="row-between">
         <h2 id="form-title">New product</h2>
-        <button class="btn secondary" id="back-to-list-btn">&larr; Back to list</button>
+        <div style="display:flex;gap:10px">
+          <a class="btn secondary hidden" id="view-on-site-link" href="#" target="_blank" rel="noopener">View on site &#8599;</a>
+          <button class="btn secondary" id="back-to-list-btn">&larr; Back to list</button>
+        </div>
       </div>
 
       <div class="card-box">
@@ -213,11 +220,11 @@
           <div class="field"><label>Altitude (m)</label><input id="f-altitude" type="number"></div>
           <div class="field"><label>Process</label><input id="f-process" placeholder="washed / natural / oxidized…"></div>
           <div class="field" id="f-roast-wrap"><label>Roast level (coffee)</label>
-            <select id="f-roast"><option value="">—</option><option value="light">Light</option><option value="medium">Medium</option><option value="dark">Dark</option></select>
+            <select id="f-roast"><option value="">None</option><option value="light">Light</option><option value="medium">Medium</option><option value="dark">Dark</option></select>
           </div>
           <div class="field hidden" id="f-leaf-wrap"><label>Leaf type (tea)</label><input id="f-leaf" placeholder="black / green / oolong…"></div>
           <div class="field hidden" id="f-caffeine-wrap"><label>Caffeine level (tea)</label>
-            <select id="f-caffeine"><option value="">—</option><option value="none">None</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
+            <select id="f-caffeine"><option value="">Not set</option><option value="none">None</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
           </div>
           <div class="field"><label>Stock count</label><input id="f-stock" type="number" value="0"></div>
           <div class="field"><label>Weight (grams)</label><input id="f-weight" type="number"></div>
@@ -263,7 +270,7 @@
         <button class="btn secondary" id="sitemedia-refresh-btn">Refresh</button>
       </div>
       <p style="opacity:0.7;font-size:0.88rem;max-width:70ch;margin-top:-6px">
-        These are the images used across the homepage — hero slides, category tiles,
+        These are the images used across the homepage: hero slides, category tiles,
         the brand-story photo, and the fallback image shown for products with no
         photo yet. Pick a replacement below and it goes live immediately, no redeploy
         needed. Uploads are resized in your browser first, same as product photos.
@@ -290,7 +297,7 @@
     </section>
 
     <!-- ---- Orders ----
-         Placeholder tab only — no backend yet. Needs: an orders table
+         Placeholder tab only, no backend yet. Needs: an orders table
          (line items, customer, shipping, payment status), and a real
          checkout/payment integration (Stripe per the project brief) before
          this can show real data. Layout below is a rough sketch to build
@@ -301,7 +308,7 @@
         <span class="badge">Coming soon</span>
       </div>
       <p style="opacity:0.7;font-size:0.88rem;max-width:70ch;margin-top:-6px">
-        Order management isn't built yet — checkout isn't wired up on the public
+        Order management isn't built yet, checkout isn't wired up on the public
         site (see AGENT_HANDOFF.md). This is a placeholder layout for when it is.
       </p>
       <table>
@@ -309,7 +316,7 @@
           <tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr>
         </thead>
         <tbody>
-          <tr><td colspan="6" style="text-align:center;opacity:0.5;padding:32px">No orders yet — this tab will populate once checkout is live.</td></tr>
+          <tr><td colspan="6" style="text-align:center;opacity:0.5;padding:32px">No orders yet. This tab will populate once checkout is live.</td></tr>
         </tbody>
       </table>
     </section>
@@ -336,7 +343,7 @@
       <div class="card-box">
         <strong style="font-size:0.85rem">Compose &amp; send</strong>
         <p style="opacity:0.65;font-size:0.82rem;max-width:60ch;margin:8px 0 14px">
-          Sending isn't wired up yet — this list only captures emails to D1 today.
+          Sending isn't wired up yet, this list only captures emails to D1 today.
           Actually sending a campaign needs an email provider (e.g. Resend or
           Mailchannels) added as a Worker secret plus a send route in
           <code>worker/index.js</code>. The form below is left in place so
@@ -345,7 +352,7 @@
         </p>
         <div class="field"><label>Subject</label><input id="newsletter-subject" placeholder="What's brewing this month"></div>
         <div class="field"><label>Body</label><textarea id="newsletter-body" rows="5" placeholder="Draft your update here…"></textarea></div>
-        <button class="btn full" id="newsletter-send-btn" disabled title="Email sending isn't wired up yet">Send to subscribers — not wired up yet</button>
+        <button class="btn full" id="newsletter-send-btn" disabled title="Email sending isn't wired up yet">Send to subscribers (not wired up yet)</button>
       </div>
     </section>
 
@@ -452,7 +459,7 @@
   function renderProductsTable() {
     const tbody = $('products-tbody');
     if (products.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6">No products yet — add the first one.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7">No products yet, add the first one.</td></tr>';
       return;
     }
     tbody.innerHTML = products.map((p) => (
@@ -463,10 +470,14 @@
         '<td>₱' + (p.price_cents / 100).toFixed(2) + '</td>' +
         '<td>' + p.stock_count + '</td>' +
         '<td>' + (p.active ? 'Yes' : 'No') + '</td>' +
+        '<td><a href="/#/product/' + p.id + '" target="_blank" rel="noopener" data-view-link style="font-size:0.78rem">View &#8599;</a></td>' +
       '</tr>'
     )).join('');
     tbody.querySelectorAll('tr').forEach((row) => {
       row.addEventListener('click', () => openForm(row.dataset.id));
+    });
+    tbody.querySelectorAll('[data-view-link]').forEach((link) => {
+      link.addEventListener('click', (e) => e.stopPropagation());
     });
   }
 
@@ -488,6 +499,8 @@
     const p = id ? products.find((x) => x.id === id) : null;
     $('form-title').textContent = p ? 'Edit product' : 'New product';
     $('delete-product-btn').classList.toggle('hidden', !p);
+    $('view-on-site-link').classList.toggle('hidden', !p);
+    if (p) $('view-on-site-link').href = '/#/product/' + p.id;
 
     $('f-name').value = p?.name || '';
     $('f-category').value = p?.category || 'coffee';
@@ -502,7 +515,7 @@
     $('f-active').value = String(p?.active ?? 1);
     $('f-notes').value = p?.flavor_notes || '';
     $('f-description').value = p?.description || '';
-    $('f-image-status').textContent = p?.image_key ? ('Current image: ' + p.image_key) : 'No image uploaded yet — showing placeholder.';
+    $('f-image-status').textContent = p?.image_key ? ('Current image: ' + p.image_key) : 'No image uploaded yet, showing placeholder.';
     $('f-image-preview').src = p?.image_key ? ('/media/' + p.image_key) : '/media/marketing/product-placeholder.webp';
     $('calc-cost').value = '';
     $('calc-price').value = p ? (p.price_cents / 100).toFixed(2) : '';
@@ -569,7 +582,7 @@
   });
 
   // ---------------- Client-side image processing ----------------
-  // Resize to a max dimension, convert to WebP, and produce a thumbnail —
+  // Resize to a max dimension, convert to WebP, and produce a thumbnail,
   // all in-browser so the Worker only ever receives finished files.
 
   async function uploadImage(productId, file) {
@@ -631,7 +644,7 @@
   // Fixed-key R2 images used across the public homepage (hero slides,
   // category tiles, brand-story, product placeholder). Same client-side
   // resizeToWebp() as product photos; each upload replaces the R2 object
-  // at marketing/{slot}.webp immediately — no D1 row, no "save" step.
+  // at marketing/{slot}.webp immediately; no D1 row, no "save" step.
 
   let siteMediaSlots = [];
 

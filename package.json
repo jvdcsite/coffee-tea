@@ -1,7 +1,7 @@
 {
   "name": "coffee-tea-site",
   "private": true,
-  "description": "Vanilla-JS coffee & tea site on a Cloudflare-only free-tier stack. No build step — these scripts only wrap deployment and local dev, they don't compile or bundle anything.",
+  "description": "Vanilla-JS coffee & tea site on a Cloudflare-only free-tier stack. No build step; these scripts only wrap deployment and local dev, they don't compile or bundle anything.",
   "scripts": {
     "dev": "wrangler dev",
     "deploy:staging": "wrangler deploy --env staging",

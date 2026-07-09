@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Placeholder brand identity ("Ember & Leaf") — swap for the client's real
+  Placeholder brand identity ("Ember & Leaf"); swap for the client's real
   name, palette, and copy once the discovery form answers are in. The CSS
   custom properties at the top of <style> are the only place colors/fonts
   are defined; change them there and the whole page follows.
@@ -8,13 +8,13 @@
   Structure/interaction patterns (hero carousel, best sellers, featured
   band, category tiles, hash-routed product view, cart drawer, newsletter
   popup, footer) are our own build, loosely modeled on how bluebottlecoffee.com
-  organizes a homepage — none of their copy, colors, or markup were copied.
+  organizes a homepage; none of their copy, colors, or markup were copied.
 
   Photography: hero slides, category tiles, the brand-story image, and the
-  product placeholder are all admin-customizable — see the "Site Media" tab
+  product placeholder are all admin-customizable; see the "Site Media" tab
   in admin.html. They're served from R2 at /media/marketing/{slot}.webp
-  (fixed keys, no D1 row), NOT from site/assets/marketing/ as static files
-  — that folder only holds the *original* processed defaults (produced by
+  (fixed keys, no D1 row), NOT from site/assets/marketing/ as static files;
+  that folder only holds the *original* processed defaults (produced by
   scripts/resize-marketing.js, a one-off asset-prep script, not a build
   step) which were seeded into R2 once so the site works out of the box.
   Editing a file in site/assets/marketing/ and redeploying does nothing to
@@ -25,20 +25,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ember & Leaf — Coffee & Tea</title>
+<title>Ember & Leaf | Coffee & Tea</title>
 <meta name="description" content="Small-batch coffee and tea, sourced by origin and roasted or steeped with the details that matter.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root {
-    /* "Cream & Cobalt" palette — the only place color is defined. */
+    /* "Cream & Cobalt" palette: the only place color is defined. */
     --ink: #1D1B17;
     --paper: #F3EEE3;
     --paper-raised: #FFFFFF;
-    --coffee: #2C4A6E;       /* cobalt — coffee category accent */
+    --coffee: #2C4A6E;       /* cobalt, coffee category accent */
     --coffee-deep: #16283B;
-    --tea: #B98A2E;          /* ochre — tea category accent */
+    --tea: #B98A2E;          /* ochre, tea category accent */
     --tea-deep: #7A5A1B;
     --line: rgba(29, 27, 23, 0.14);
 
@@ -608,9 +608,8 @@
   .cart-head button:hover { background: var(--paper); }
   .cart-items { flex: 1; overflow-y: auto; padding: 16px 22px; }
   .cart-empty { opacity: 0.55; font-size: 0.88rem; text-align: center; margin-top: 40px; }
-  .cart-line { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-  .cart-line .swatch-mini { width: 46px; height: 46px; border-radius: 6px; flex-shrink: 0; background: linear-gradient(135deg, var(--coffee), var(--coffee-deep)); }
-  .cart-line .swatch-mini.tea { background: linear-gradient(135deg, var(--tea), var(--tea-deep)); }
+  .cart-line { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .cart-line .swatch-mini { width: 56px; height: 56px; border-radius: 6px; flex-shrink: 0; object-fit: cover; display: block; }
   .cart-line-info { flex: 1; min-width: 0; }
   .cart-line-info .name { font-size: 0.88rem; font-weight: 600; }
   .cart-line-info .qty-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
@@ -675,7 +674,7 @@
       <div class="slide-content">
         <span class="eyebrow" style="opacity:0.85">Steeped, not guessed</span>
         <h1>Tea sourced the same way we source coffee.</h1>
-        <p>Same rigor, same transparency — leaf type, oxidation, and where it grew.</p>
+        <p>Same rigor, same transparency: leaf type, oxidation, and where it grew.</p>
         <button class="btn-primary" data-goto="tea">Shop tea</button>
       </div>
     </div>
@@ -684,7 +683,7 @@
       <div class="slide-content">
         <span class="eyebrow" style="opacity:0.85">Small batch, always fresh</span>
         <h1>Start with what everyone's reaching for.</h1>
-        <p>The lots and leaves that sell out first — restocked in small runs, not warehoused.</p>
+        <p>The lots and leaves that sell out first, restocked in small runs, not warehoused.</p>
         <button class="btn-primary" data-goto="best-sellers">Shop best sellers</button>
       </div>
     </div>
@@ -703,7 +702,7 @@
       <div class="section-head">
         <h2>Best sellers</h2>
         <!--
-          "Best seller" has no real order/sales data behind it yet — it's a
+          "Best seller" has no real order/sales data behind it yet; it's a
           proxy computed client-side from stock_count (lowest active stock =
           selling fastest). Swap for a real ranking once order history exists.
         -->
@@ -744,8 +743,8 @@
       </div>
       <div class="story-copy">
         <span class="eyebrow">Our approach</span>
-        <!-- Placeholder copy — replace with the client's real sourcing/roasting story once discovery-form answers are in. -->
-        <p>We work directly with a small number of farms and gardens, paying for quality and traceability first — every bag and tin carries the origin, altitude, and process behind it, because we think that context is part of what you're buying.</p>
+        <!-- Placeholder copy: replace with the client's real sourcing/roasting story once discovery-form answers are in. -->
+        <p>We work directly with a small number of farms and gardens, paying for quality and traceability first; every bag and tin carries the origin, altitude, and process behind it, because we think that context is part of what you're buying.</p>
       </div>
     </div>
   </section>
@@ -755,7 +754,7 @@
       <span class="eyebrow">Coming soon</span>
       <h2>Subscriptions</h2>
       <p>Recurring coffee and tea delivery is on the roadmap.</p>
-      <!-- Needs: a subscription-plan data model (cadence, product, quantity) plus recurring billing (Stripe Billing, per the project's payment brief) — not built yet. -->
+      <!-- Needs: a subscription-plan data model (cadence, product, quantity) plus recurring billing (Stripe Billing, per the project's payment brief); not built yet. -->
       <p class="placeholder-note">Backend work needed: subscription plans table + recurring billing integration.</p>
     </div>
   </section>
@@ -765,7 +764,7 @@
       <span class="eyebrow">Coming soon</span>
       <h2>Find Us</h2>
       <p>Stockists and pop-up locations will be listed here once we have them.</p>
-      <!-- Needs: a locations table (address, hours, map link) and an admin panel to manage it — not built yet. -->
+      <!-- Needs: a locations table (address, hours, map link) and an admin panel to manage it; not built yet. -->
       <p class="placeholder-note">Backend work needed: locations table + admin management UI.</p>
     </div>
   </section>
@@ -815,7 +814,7 @@
     <div class="newsletter-band">
       <div>
         <h3>Join the list</h3>
-        <p>Small-batch drops and brewing notes — no spam, unsubscribe anytime.</p>
+        <p>Small-batch drops and brewing notes, no spam, unsubscribe anytime.</p>
       </div>
       <form class="newsletter-form" id="footer-newsletter-form">
         <input type="email" required placeholder="you@example.com" aria-label="Email address" id="footer-newsletter-email">
@@ -860,7 +859,7 @@
     </div>
 
     <div class="footer-legal">
-      <span>Ember & Leaf — placeholder copy, replace once brand details are confirmed.</span>
+      <span>Ember & Leaf: placeholder copy, replace once brand details are confirmed.</span>
       <div class="legal-links">
         <span class="link-disabled" aria-disabled="true">Privacy <em>coming soon</em></span>
         <span class="link-disabled" aria-disabled="true">Terms <em>coming soon</em></span>
@@ -897,7 +896,7 @@
   </div>
   <div class="cart-footer">
     <div class="cart-subtotal"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
-    <button class="btn-primary full" id="cart-checkout-btn" disabled title="Checkout isn't in scope yet">Checkout — coming soon</button>
+    <button class="btn-primary full" id="cart-checkout-btn" disabled title="Checkout isn't in scope yet">Checkout (coming soon)</button>
   </div>
 </aside>
 
@@ -942,7 +941,7 @@
     return bits.join('');
   }
 
-  // D1's datetime('now') returns "YYYY-MM-DD HH:MM:SS" (UTC, no "T"/"Z") —
+  // D1's datetime('now') returns "YYYY-MM-DD HH:MM:SS" (UTC, no "T"/"Z");
   // normalize before parsing so this isn't Safari-dependent.
   function parseSqlDate(str) {
     if (!str) return null;
@@ -1009,7 +1008,7 @@
   const utilityMessages = [
     'Free shipping on orders over $40',
     'New arrivals dropping every month',
-    'Small-batch, always fresh — never warehoused'
+    'Small-batch, always fresh, never warehoused'
   ];
   let utilityIndex = 0;
   if (!prefersReducedMotion) {
@@ -1136,7 +1135,7 @@
     $('catalog-title').textContent = titleFor(currentCategory);
     $('catalog-count').textContent = list.length + (list.length === 1 ? ' item' : ' items');
     if (list.length === 0) {
-      grid.innerHTML = '<div class="state-msg">Nothing here yet — check back soon.</div>';
+      grid.innerHTML = '<div class="state-msg">Nothing here yet, check back soon.</div>';
       return;
     }
     grid.innerHTML = list.map(cardHtml).join('');
@@ -1198,7 +1197,7 @@
     const homeView = $('home-view');
     const productView = $('product-view');
     if (!p) {
-      // Unknown/removed product id — fall back to the catalog rather than a blank page.
+      // Unknown/removed product id, fall back to the catalog rather than a blank page.
       location.hash = '';
       return;
     }
@@ -1238,7 +1237,7 @@
   }
   window.addEventListener('hashchange', handleRoute);
 
-  // ---------------- Cart (UI-only stub — no checkout/payment logic) ----------------
+  // ---------------- Cart (UI-only stub, no checkout/payment logic) ----------------
 
   function saveCart() {
     try { sessionStorage.setItem('cart', JSON.stringify(cart)); } catch (e) {}
@@ -1250,7 +1249,7 @@
     if (!p || p.stock_count <= 0) return;
     const line = cart.find((c) => c.id === id);
     if (line) line.qty += 1;
-    else cart.push({ id: p.id, name: p.name, category: p.category, price_cents: p.price_cents, currency: p.currency, qty: 1 });
+    else cart.push({ id: p.id, name: p.name, category: p.category, thumb_key: p.thumb_key, price_cents: p.price_cents, currency: p.currency, qty: 1 });
     saveCart();
     openCart();
   }
@@ -1283,7 +1282,7 @@
 
     container.innerHTML = cart.map((c) => (
       '<div class="cart-line">' +
-        '<div class="swatch-mini' + (c.category === 'tea' ? ' tea' : '') + '"></div>' +
+        '<img class="swatch-mini" src="' + (c.thumb_key ? '/media/' + c.thumb_key : '/media/marketing/product-placeholder.webp') + '" alt="">' +
         '<div class="cart-line-info">' +
           '<div class="name">' + escapeHtml(c.name) + '</div>' +
           '<div class="qty-row">' +

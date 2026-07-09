@@ -8,7 +8,7 @@
   // Serves site/index.html and friends as static assets. Requests to /api/*
   // are routed to the Worker first (see run_worker_first below); everything
   // else is served directly from the assets directory with no Worker
-  // invocation at all — keeps request usage down.
+  // invocation at all, keeps request usage down.
   "assets": {
     "directory": "./site",
     "binding": "ASSETS",
@@ -35,7 +35,7 @@
     }
   ],
 
-  // Custom domain routing — fill in once the domain's DNS is on Cloudflare.
+  // Custom domain routing: fill in once the domain's DNS is on Cloudflare.
   // Leave this array empty to deploy first on the workers.dev subdomain,
   // confirm everything works, then add the route.
   "routes": [
@@ -47,7 +47,7 @@
     "enabled": true
   },
 
-  // Secrets are NOT set here — never commit real credentials.
+  // Secrets are NOT set here; never commit real credentials.
   // Set them with:
   //   wrangler secret put ADMIN_USERNAME
   //   wrangler secret put ADMIN_PASSWORD_HASH

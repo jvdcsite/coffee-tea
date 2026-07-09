@@ -1,9 +1,9 @@
 /**
- * Coffee & Tea Site — Worker
+ * Coffee & Tea Site, Worker
  *
  * Single Worker serves the static site (via the ASSETS binding, configured
  * in wrangler.jsonc) and everything under /api/*. No build step, no
- * framework — plain Request/Response handling.
+ * framework; plain Request/Response handling.
  *
  * Routes:
  *   GET    /api/products              public catalog (optional ?category=coffee|tea)
@@ -24,7 +24,7 @@
  *   GET    /api/admin/site-media            status of every homepage image slot [auth]
  *   POST   /api/admin/site-media/:slot      replace a homepage image slot       [auth]
  *          (slots: hero-1, hero-2, hero-3, category-coffee, category-tea,
- *          brand-story, product-placeholder — see SITE_MEDIA_SLOTS below.
+ *          brand-story, product-placeholder; see SITE_MEDIA_SLOTS below.
  *          Publicly served at /media/marketing/{slot}.webp, same R2 proxy
  *          serveMedia() already uses for product photos.)
  *
@@ -33,7 +33,7 @@
  *   ADMIN_PASSWORD_HASH   SHA-256 hex digest of the admin password
  *   SHEETS_WEBHOOK_URL    the deployed Google Apps Script Web App URL
  *   TURNSTILE_SECRET_KEY  for verifying Turnstile tokens on public forms
- *                         (not yet wired to a route — see apps-script notes;
+ *                         (not yet wired to a route; see apps-script notes;
  *                         call verifyTurnstile() once a public form exists)
  */
 
@@ -41,7 +41,7 @@ const SESSION_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
 
 // Fixed set of homepage image slots an admin can customize. Each is stored
 // in R2 at marketing/{slot}.webp and served publicly via the existing
-// /media/* proxy — the same mechanism product photos use, just a fixed key
+// /media/* proxy, the same mechanism product photos use, just a fixed key
 // instead of one keyed by product id. Adding a slot here + wiring the CSS
 // url() or <img src> to /media/marketing/{slot}.webp in site/index.html is
 // the whole integration; no D1 table needed since the "current" image is
@@ -50,8 +50,8 @@ const SITE_MEDIA_SLOTS = [
   { slot: "hero-1", label: "Hero slide 1 (Coffee)", maxDim: 1600 },
   { slot: "hero-2", label: "Hero slide 2 (Tea)", maxDim: 1600 },
   { slot: "hero-3", label: "Hero slide 3 (Best sellers)", maxDim: 1600 },
-  { slot: "category-coffee", label: "Category tile — Coffee", maxDim: 800 },
-  { slot: "category-tea", label: "Category tile — Tea", maxDim: 800 },
+  { slot: "category-coffee", label: "Category tile: Coffee", maxDim: 800 },
+  { slot: "category-tea", label: "Category tile: Tea", maxDim: 800 },
   { slot: "brand-story", label: "Brand story image", maxDim: 1200 },
   { slot: "product-placeholder", label: "Product placeholder (no-photo fallback)", maxDim: 800 },
 ];
@@ -182,7 +182,7 @@ async function getProduct(env, id) {
 
 function toPublicProduct(row) {
   // Strip internal-only fields (stock_count stays internal-ish but is useful
-  // for an "X left" display — keep it; drop nothing sensitive lives here
+  // for an "X left" display, keep it; drop nothing sensitive lives here
   // today, but this is the seam to redact fields later if needed).
   return row;
 }
@@ -290,7 +290,7 @@ async function updateProduct(request, env, id) {
 }
 
 async function deleteProduct(env, id) {
-  // Direct admin delete is a manual, confirmed action from the dashboard —
+  // Direct admin delete is a manual, confirmed action from the dashboard;
   // this is NOT the Sheets restore path, which must never auto-delete.
   await env.DB.prepare("DELETE FROM products WHERE id = ?").bind(id).run();
   return json({ ok: true });
@@ -315,7 +315,7 @@ async function uploadMedia(request, env) {
     httpMetadata: { contentType: "image/webp" },
   });
 
-  // The R2 put alone doesn't make the image show up anywhere — the public
+  // The R2 put alone doesn't make the image show up anywhere; the public
   // site and admin health-check both read image_key/thumb_key off the D1
   // row, not off R2 directly. Persist it here so callers don't have to
   // remember to issue a separate PUT /admin/products/:id afterward.
@@ -328,9 +328,9 @@ async function uploadMedia(request, env) {
 }
 
 // ---------------------------------------------------------------------------
-// Media serving — R2 has no public bucket configured here, so the Worker
+// Media serving: R2 has no public bucket configured here, so the Worker
 // proxies it. (An alternative for higher traffic: put a public R2 custom
-// domain in front and skip this route entirely — see ARCHITECTURE.md.)
+// domain in front and skip this route entirely; see ARCHITECTURE.md.)
 // ---------------------------------------------------------------------------
 
 async function serveMedia(env, key) {
@@ -344,7 +344,7 @@ async function serveMedia(env, key) {
 }
 
 // ---------------------------------------------------------------------------
-// Health check — verifies R2 assets exist and required fields are filled in
+// Health check: verifies R2 assets exist and required fields are filled in
 // ---------------------------------------------------------------------------
 
 async function healthCheck(env) {
@@ -372,7 +372,7 @@ async function healthCheck(env) {
 }
 
 // ---------------------------------------------------------------------------
-// Google Sheets sync — push / diff / restore
+// Google Sheets sync: push / diff / restore
 // ---------------------------------------------------------------------------
 
 async function sheetsPush(env) {
@@ -430,7 +430,7 @@ async function sheetsRestore(request, env) {
   const body = await safeJson(request);
   const { added = [], updated = [] } = body ?? {};
 
-  // Additive/update only — d1_only rows are intentionally never touched here.
+  // Additive/update only; d1_only rows are intentionally never touched here.
   for (const row of added) {
     await createProductFromRow(env, row);
   }
@@ -486,7 +486,7 @@ function sortKeys(obj) {
 }
 
 // ---------------------------------------------------------------------------
-// Newsletter — capture is real (writes to D1). Sending campaigns is NOT
+// Newsletter: capture is real (writes to D1). Sending campaigns is NOT
 // wired up here; that needs an email provider (e.g. Resend, Mailchannels)
 // added as a secret plus a send route. The admin "Compose" UI reflects that.
 // ---------------------------------------------------------------------------
@@ -518,7 +518,7 @@ async function deleteNewsletterSubscriber(env, email) {
 }
 
 // ---------------------------------------------------------------------------
-// Site media — admin-customizable homepage images (hero, category tiles,
+// Site media: admin-customizable homepage images (hero, category tiles,
 // brand story, product placeholder). Fixed R2 keys, no D1 row involved.
 // ---------------------------------------------------------------------------
 
@@ -553,7 +553,7 @@ async function uploadSiteMedia(request, env, slot) {
 }
 
 // ---------------------------------------------------------------------------
-// Turnstile verification — call this from any public form route once one
+// Turnstile verification: call this from any public form route once one
 // exists (e.g. a contact/inquiry endpoint). Not yet wired to a route.
 // ---------------------------------------------------------------------------
 
