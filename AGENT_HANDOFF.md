@@ -19,9 +19,14 @@ Resources created and wired into `wrangler.jsonc`:
   was chosen directly by the client — not recorded here).
 - **Production:** https://coffee-tea-site.johncolastre.workers.dev
 - **Staging:** https://coffee-tea-site-staging.johncolastre.workers.dev
-- Both currently on the homepage redesign — check with the client whether
-  the font/copy/currency pass below has also gone to production before
-  assuming they're in sync; see git log for the actual deploy history.
+- Both are in sync as of this writing (redesign + currency/font/photo pass
+  below, all deployed to both). Production and staging share the *same* D1
+  database and R2 bucket (see `wrangler.jsonc` — same `database_id` and
+  `bucket_name` under both the top-level config and `env.staging`), so any
+  data change (product edits, image uploads, newsletter signups) is
+  instantly visible on both regardless of which URL you're looking at.
+  Only the *code* (Worker + static assets) can drift between them — that's
+  the only thing `deploy:staging` vs `deploy:prod` actually controls.
 
 **Not yet done:** `SHEETS_WEBHOOK_URL` / `TURNSTILE_SECRET_KEY` secrets
 (Sheets sync and Turnstile untested), real branding (name/copy), custom
@@ -45,6 +50,26 @@ symbols (product table, margin calculator) that were swapped to `₱`.
 `--font-display: 'Space Grotesk'`, `--font-body: 'DM Sans'`,
 `--font-mono` unchanged (`'IBM Plex Mono'`). Replaced the old
 Fraunces/Inter pairing in both `site/index.html` and `site/admin.html`.
+
+Client feedback: Space Grotesk read as too clunky/blocky at headline size.
+Fix was weight, not family — the Google Fonts import now only loads 400/500
+(dropped 600), and every heading using `var(--font-display)` was turned
+down a notch (former 600 → 500, former 500 → 400). If another "still too
+heavy" round comes in, the next lever is swapping the family entirely
+(Sora/Manrope were the alternatives on the table), not weight.
+
+## Product photo placeholder (front-end only)
+
+`site/assets/marketing/product-placeholder.webp` — a blank/unbranded
+packaging mockup, shown wherever a product has no `image_key`/`thumb_key`:
+public catalog cards, the featured band, the product detail view, and in
+`admin.html`'s product list thumbnails + edit-form preview. This is a
+**display-only fallback** — it is never written to a product's
+`image_key`/`thumb_key` in D1, and never goes through the R2 admin upload
+endpoint. Real product photos still go through the existing
+`resizeToWebp()` → `POST /api/admin/upload` flow exactly as before; this
+just means an unphotographed product looks intentional instead of showing
+a blank swatch.
 
 ## Marketing photography pipeline
 

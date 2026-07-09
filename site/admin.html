@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Ember & Leaf</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root {
     /* "Cream & Cobalt" palette — matches site/index.html. */
@@ -23,7 +23,7 @@
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); }
   button, input, select, textarea { font-family: inherit; font-size: 0.9rem; }
-  h1, h2, h3 { font-family: var(--font-display); font-weight: 500; margin: 0; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; }
 
   .hidden { display: none !important; }
 
@@ -230,7 +230,10 @@
         <!-- ---- Image upload (client resizes/converts before this point) ---- -->
         <div class="field" style="margin-top:16px">
           <label>Product image (will be resized + converted to WebP in your browser before upload)</label>
-          <input id="f-image-input" type="file" accept="image/*">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+            <img id="f-image-preview" src="/assets/marketing/product-placeholder.webp" alt="" style="width:56px;height:56px;border-radius:6px;object-fit:cover;border:1px solid var(--line)">
+            <input id="f-image-input" type="file" accept="image/*">
+          </div>
           <div id="f-image-status" style="font-size:0.78rem;opacity:0.65;margin-top:4px"></div>
         </div>
 
@@ -411,7 +414,7 @@
     }
     tbody.innerHTML = products.map((p) => (
       '<tr class="clickable" data-id="' + p.id + '">' +
-        '<td><span class="dot unknown"></span></td>' +
+        '<td><img src="' + (p.thumb_key ? '/media/' + p.thumb_key : '/assets/marketing/product-placeholder.webp') + '" alt="" style="width:32px;height:32px;border-radius:4px;object-fit:cover;display:block"></td>' +
         '<td>' + escapeHtml(p.name) + '</td>' +
         '<td><span class="badge">' + p.category + '</span></td>' +
         '<td>₱' + (p.price_cents / 100).toFixed(2) + '</td>' +
@@ -456,7 +459,8 @@
     $('f-active').value = String(p?.active ?? 1);
     $('f-notes').value = p?.flavor_notes || '';
     $('f-description').value = p?.description || '';
-    $('f-image-status').textContent = p?.image_key ? ('Current image: ' + p.image_key) : 'No image uploaded yet.';
+    $('f-image-status').textContent = p?.image_key ? ('Current image: ' + p.image_key) : 'No image uploaded yet — showing placeholder.';
+    $('f-image-preview').src = p?.image_key ? ('/media/' + p.image_key) : '/assets/marketing/product-placeholder.webp';
     $('calc-cost').value = '';
     $('calc-price').value = p ? (p.price_cents / 100).toFixed(2) : '';
     updateCalc();

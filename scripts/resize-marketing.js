@@ -23,6 +23,12 @@ const jobs = [
 
   // Brand story — landscape, fits the two-column band, max 1200px long edge.
   { in: "75E5DB2D-8631-4B32-9237-3AC9DA6E60A5.png", out: "brand-story.webp", width: 1200, height: 900 },
+
+  // Product placeholder — blank/unbranded packaging mockup, used as a
+  // front-end fallback ONLY (never written to D1's image_key/thumb_key,
+  // never uploaded through the R2 admin flow) for products with no real
+  // photo yet. Square, max 800px, same as a category tile.
+  { in: "87CB9462-4122-4405-8060-4A49979193DA.png", out: "product-placeholder.webp", width: 800, height: 800 },
 ];
 
 async function run() {
