@@ -18,15 +18,13 @@ Resources created and wired into `wrangler.jsonc`:
   production and `staging` Worker environments (username `admin`; password
   was chosen directly by the client — not recorded here).
 - **Production:** https://coffee-tea-site.johncolastre.workers.dev — running
-  the **pre-redesign** version (original small tasting-card catalog + modal).
-  Not yet updated with the homepage redesign described below — needs an
-  explicit go-ahead before `npm run deploy:prod` ships it.
+  the current homepage redesign (deployed with explicit go-ahead).
 - **Staging:** https://coffee-tea-site-staging.johncolastre.workers.dev —
-  running the **current redesign** (see below), verified end-to-end.
+  same redesign, verified end-to-end first.
 
 **Not yet done:** `SHEETS_WEBHOOK_URL` / `TURNSTILE_SECRET_KEY` secrets
-(Sheets sync and Turnstile untested), real branding (name/copy), custom
-domain, production deploy of the redesign. See "Suggested next steps" below.
+(Sheets sync and Turnstile untested), real branding (name/copy), tea
+photography, custom domain. See "Suggested next steps" below.
 
 ## Homepage redesign (site/index.html + site/admin.html)
 
@@ -166,9 +164,8 @@ history on a different branch). Initialized a fresh repo scoped to
 1. ~~Create the actual Cloudflare account, D1 database, and R2 bucket~~ — done.
 2. ~~Set secrets, run `npm run db:init:remote`, deploy to staging~~ — done.
 3. ~~Deploy the initial (pre-redesign) build to production~~ — done.
-4. ~~Homepage redesign + newsletter capture~~ — done, live on staging only.
-5. Deploy the redesign to production (`npm run deploy:prod`) — only after
-   explicit go-ahead, per the non-negotiables in `README.md`.
+4. ~~Homepage redesign + newsletter capture~~ — done.
+5. ~~Deploy the redesign to production~~ — done, with explicit go-ahead.
 6. Get tea product photography (coffee photography already exists in
    `site/assets/marketing/`); get the client discovery-form answers back to
    update brand name/copy.
