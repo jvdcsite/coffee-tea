@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin | Ember & Leaf</title>
+<title>Admin | Coffee & Tea</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root {
@@ -37,7 +37,7 @@
   .login-box {
     background: var(--paper-raised);
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 36px;
     width: 100%;
     max-width: 360px;
@@ -56,7 +56,7 @@
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     padding: 9px 16px;
     font-weight: 600;
     cursor: pointer;
@@ -83,7 +83,7 @@
   }
   header.top nav { display: flex; gap: 6px; }
   header.top nav button {
-    border: none; background: transparent; padding: 7px 14px; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+    border: none; background: transparent; padding: 7px 14px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.85rem;
   }
   header.top nav button.active { background: var(--ink); color: var(--paper); }
 
@@ -93,30 +93,30 @@
 
   .row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 
-  table { width: 100%; border-collapse: collapse; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
   th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 0.85rem; }
   th { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
   tr:last-child td { border-bottom: none; }
   tr.clickable { cursor: pointer; }
   tr.clickable:hover { background: rgba(28,20,16,0.03); }
 
-  .badge { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; background: rgba(28,20,16,0.08); }
+  .badge { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: rgba(28,20,16,0.08); }
 
-  .card-box { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+  .card-box { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px; padding: 20px; margin-bottom: 20px; }
 
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
 
   .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
 
-  .calc-box { background: rgba(201,138,62,0.1); border: 1px solid rgba(201,138,62,0.35); border-radius: 6px; padding: 14px; margin-top: 8px; }
+  .calc-box { background: rgba(201,138,62,0.1); border: 1px solid rgba(201,138,62,0.35); border-radius: 4px; padding: 14px; margin-top: 8px; }
   .calc-box .row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
   .calc-box .field { flex: 1; min-width: 120px; margin-bottom: 0; }
   .calc-result { font-family: var(--font-mono); font-weight: 500; margin-top: 10px; font-size: 0.9rem; }
 
   /* ---------- Site Media ---------- */
   .live-preview-wrap { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0 28px; }
-  .live-preview-frame { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+  .live-preview-frame { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: #fff; }
   .live-preview-frame .frame-label {
     font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
     opacity: 0.6; padding: 8px 12px; border-bottom: 1px solid var(--line);
@@ -125,8 +125,8 @@
   .live-preview-viewport iframe { border: none; display: block; transform-origin: top left; pointer-events: none; }
 
   .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-  .media-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
-  .media-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; background: var(--paper); margin-bottom: 10px; display: block; }
+  .media-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px; padding: 14px; }
+  .media-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 4px; background: var(--paper); margin-bottom: 10px; display: block; }
   .media-card .media-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 2px; }
   .media-card .media-meta { font-size: 0.7rem; opacity: 0.5; font-family: var(--font-mono); margin-bottom: 10px; }
   .media-card input[type="file"] { width: 100%; font-size: 0.78rem; }
@@ -138,7 +138,7 @@
   .toast {
     position: fixed; bottom: 20px; right: 20px;
     background: var(--ink); color: var(--paper);
-    padding: 10px 16px; border-radius: 5px; font-size: 0.85rem;
+    padding: 10px 16px; border-radius: 4px; font-size: 0.85rem;
     opacity: 0; transform: translateY(8px);
     transition: opacity 0.2s ease, transform 0.2s ease;
     pointer-events: none;
@@ -152,7 +152,7 @@
 <div id="login-screen">
   <div class="login-box">
     <h1>Admin</h1>
-    <p class="sub">Ember &amp; Leaf dashboard</p>
+    <p class="sub">Coffee &amp; Tea dashboard</p>
     <div class="field">
       <label for="login-username">Username</label>
       <input id="login-username" type="text" autocomplete="username">
@@ -169,7 +169,7 @@
 <!-- ================= DASHBOARD ================= -->
 <div id="dashboard">
   <header class="top">
-    <h1 style="font-size:1.1rem">Ember &amp; Leaf | Admin</h1>
+    <h1 style="font-size:1.1rem">Coffee &amp; Tea | Admin</h1>
     <nav>
       <button class="active" data-panel="list">Products</button>
       <button data-panel="sitemedia">Site Media</button>
@@ -250,7 +250,7 @@
         <div class="field" style="margin-top:16px">
           <label>Product image (will be resized + converted to WebP in your browser before upload)</label>
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-            <img id="f-image-preview" src="/media/marketing/product-placeholder.webp" alt="" style="width:56px;height:56px;border-radius:6px;object-fit:cover;border:1px solid var(--line)">
+            <img id="f-image-preview" src="/media/marketing/product-placeholder.webp" alt="" style="width:56px;height:56px;border-radius:4px;object-fit:cover;border:1px solid var(--line)">
             <input id="f-image-input" type="file" accept="image/*">
           </div>
           <div id="f-image-status" style="font-size:0.78rem;opacity:0.65;margin-top:4px"></div>

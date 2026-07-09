@@ -256,9 +256,9 @@ history on a different branch). Initialized a fresh repo scoped to
 
 ## What's intentionally NOT built yet
 
-- **Real branding.** Site currently says "Ember & Leaf" — a placeholder.
-  Swap name, palette (CSS custom properties at the top of `index.html`'s
-  `<style>`), and copy once the client's discovery-form answers are in.
+- **Real branding.** Site now says "Coffee & Tea". Palette (CSS custom
+  properties at the top of `index.html`'s `<style>`) and remaining copy
+  still to confirm once the client's discovery-form answers are in.
 - **Payment/checkout.** Brief says: no payment processor unless the project
   needs one, Stripe (pay-per-transaction) over subscription platforms if it
   does. Confirm with the client whether launch is showcase-only or direct
@@ -308,9 +308,9 @@ history on a different branch). Initialized a fresh repo scoped to
    product photo uploads~~ — done, see the sections above. Confirm with the
    client whether this pass also needs to go to production (check
    `git log` / actually load both URLs — don't assume from this doc alone).
-7. Get the client discovery-form answers back to update brand name/copy —
-   "Ember & Leaf" is still a placeholder even though currency/fonts/photos
-   are now real decisions.
+7. Get the client discovery-form answers back to confirm remaining copy —
+   brand name is now "Coffee & Tea"; currency/fonts/photos are also real
+   decisions.
 9. Wire a real email provider for the Newsletter "Send" button, if the
    client wants in-house sending rather than exporting the CSV into
    something like Mailchimp.

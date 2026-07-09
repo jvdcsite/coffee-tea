@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <!--
-  Placeholder brand identity ("Ember & Leaf"); swap for the client's real
-  name, palette, and copy once the discovery form answers are in. The CSS
-  custom properties at the top of <style> are the only place colors/fonts
-  are defined; change them there and the whole page follows.
+  Brand identity: "Coffee & Tea". The CSS custom properties at the top of
+  <style> are the only place colors/fonts are defined; change them there
+  and the whole page follows.
 
   Structure/interaction patterns (hero carousel, best sellers, featured
   band, category tiles, hash-routed product view, cart drawer, newsletter
@@ -25,11 +24,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ember & Leaf | Coffee & Tea</title>
+<title>Coffee & Tea | Small-batch coffee & tea</title>
 <meta name="description" content="Small-batch coffee and tea, sourced by origin and roasted or steeped with the details that matter.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root {
     /* "Cream & Cobalt" palette: the only place color is defined. */
@@ -42,7 +41,7 @@
     --tea-deep: #7A5A1B;
     --line: rgba(29, 27, 23, 0.14);
 
-    --font-display: 'Space Grotesk', sans-serif;
+    --font-display: 'Outfit', sans-serif;
     --font-body: 'DM Sans', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
 
@@ -83,7 +82,7 @@
     background: var(--ink);
     color: var(--paper);
     border: none;
-    border-radius: 999px;
+    border-radius: 4px;
     padding: 12px 24px;
     font-weight: 600;
     font-size: 0.9rem;
@@ -100,7 +99,7 @@
     background: transparent;
     color: var(--ink);
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: 4px;
     padding: 11px 22px;
     font-weight: 600;
     font-size: 0.9rem;
@@ -140,7 +139,7 @@
   .brand {
     font-family: var(--font-display);
     font-size: 1.4rem;
-    font-weight: 500;
+    font-weight: 300;
     letter-spacing: -0.01em;
     transition: font-size 0.2s ease;
   }
@@ -169,7 +168,7 @@
     transform: translateX(-50%);
     background: var(--paper-raised);
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 4px;
     box-shadow: 0 12px 28px rgba(29,27,23,0.14);
     padding: 8px;
     display: flex;
@@ -187,7 +186,7 @@
   .sub-link {
     display: block;
     padding: 9px 14px;
-    border-radius: 6px;
+    border-radius: 4px;
     font-size: 0.86rem;
     font-weight: 500;
   }
@@ -221,7 +220,7 @@
   .section-head { max-width: 60ch; margin-bottom: 32px; }
   .section-head h2 {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 300;
     font-size: clamp(1.5rem, 2.6vw, 2rem);
     margin: 0 0 8px;
   }
@@ -263,7 +262,7 @@
   }
   .slide-content h1 {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 300;
     font-size: clamp(1.9rem, 4vw, 3rem);
     line-height: 1.1;
     margin: 0 0 14px;
@@ -316,7 +315,7 @@
   .card {
     background: var(--paper-raised);
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 4px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -338,19 +337,19 @@
     font-family: var(--font-mono); font-size: 0.65rem;
     text-transform: uppercase; letter-spacing: 0.08em;
     background: rgba(29,27,23,0.55); color: var(--paper);
-    padding: 3px 8px; border-radius: 3px;
+    padding: 3px 8px; border-radius: 4px;
   }
   .card .badge {
     position: absolute; top: 10px; right: 10px;
     font-family: var(--font-mono); font-size: 0.62rem;
     text-transform: uppercase; letter-spacing: 0.06em;
-    color: #fff; padding: 3px 8px; border-radius: 3px;
+    color: #fff; padding: 3px 8px; border-radius: 4px;
   }
   .card .badge.badge-new { background: var(--coffee); }
   .card .badge.badge-limited { background: var(--tea); }
 
   .card .body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; position: relative; }
-  .card h3 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 400; margin: 0; }
+  .card h3 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 300; margin: 0; }
   .card .origin { font-size: 0.85rem; opacity: 0.7; }
 
   .data-strip {
@@ -378,7 +377,7 @@
   .quick-add {
     position: absolute; right: 18px; bottom: 54px;
     background: var(--ink); color: var(--paper);
-    border: none; border-radius: 999px;
+    border: none; border-radius: 4px;
     padding: 7px 14px; font-size: 0.75rem; font-weight: 600;
     cursor: pointer;
     opacity: 0; transform: translateY(4px);
@@ -395,20 +394,20 @@
 
   /* ---------- Best sellers / catalog section heads ---------- */
   .catalog-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; }
-  .catalog-head h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin: 0; }
+  .catalog-head h2 { font-family: var(--font-display); font-weight: 300; font-size: 1.4rem; margin: 0; }
   .count { font-family: var(--font-mono); font-size: 0.8rem; opacity: 0.6; }
 
   nav.tabs {
     display: flex; gap: 4px;
     background: var(--paper-raised);
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: 4px;
     padding: 4px;
   }
   nav.tabs button {
     font-size: 0.85rem; font-weight: 600;
     border: none; background: transparent; color: var(--ink);
-    padding: 8px 18px; border-radius: 999px; cursor: pointer;
+    padding: 8px 18px; border-radius: 4px; cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
   }
   nav.tabs button.active { background: var(--ink); color: var(--paper); }
@@ -421,11 +420,11 @@
     gap: 48px; align-items: center;
   }
   .featured-media {
-    height: 380px; border-radius: 10px;
+    height: 380px; border-radius: 4px;
     background: linear-gradient(135deg, var(--coffee), var(--coffee-deep));
   }
   .featured-media.tea { background: linear-gradient(135deg, var(--tea), var(--tea-deep)); }
-  .featured-copy h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.5rem, 3vw, 2.1rem); margin: 0 0 12px; }
+  .featured-copy h2 { font-family: var(--font-display); font-weight: 300; font-size: clamp(1.5rem, 3vw, 2.1rem); margin: 0 0 12px; }
   .featured-copy .desc { opacity: 0.75; margin: 0 0 16px; }
   .featured-copy .data-strip { margin-bottom: 16px; }
   .featured-actions { display: flex; align-items: center; gap: 20px; }
@@ -435,7 +434,7 @@
   /* ---------- Category tiles ---------- */
   .tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .category-tile {
-    border: none; border-radius: 10px;
+    border: none; border-radius: 4px;
     padding: 48px 32px;
     text-align: left;
     color: #fff;
@@ -455,7 +454,7 @@
     background-size: cover;
     background-position: center;
   }
-  .tile-label { font-family: var(--font-display); font-size: 1.4rem; font-weight: 400; }
+  .tile-label { font-family: var(--font-display); font-size: 1.4rem; font-weight: 300; }
   .tile-sub { font-size: 0.85rem; opacity: 0.85; }
   @media (max-width: 640px) { .tile-grid { grid-template-columns: 1fr; } }
 
@@ -467,7 +466,7 @@
     gap: 48px;
     align-items: center;
   }
-  .story-media { border-radius: 10px; overflow: hidden; }
+  .story-media { border-radius: 4px; overflow: hidden; }
   .story-media img { width: 100%; height: 100%; max-height: 400px; object-fit: cover; display: block; }
   .story-copy { max-width: 46ch; }
   .story-band p { font-family: var(--font-display); font-size: clamp(1.1rem, 2vw, 1.4rem); line-height: 1.5; margin: 0; }
@@ -479,7 +478,7 @@
   /* ---------- Placeholder sections (Subscriptions / Find Us) ---------- */
   .placeholder-section { background: var(--paper-raised); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   .placeholder-section .wrap { max-width: 60ch; text-align: center; margin: 0 auto; }
-  .placeholder-section h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.6rem; margin: 0 0 10px; }
+  .placeholder-section h2 { font-family: var(--font-display); font-weight: 300; font-size: 1.6rem; margin: 0 0 10px; }
   .placeholder-section p { opacity: 0.7; margin: 0 0 4px; }
   .placeholder-note { font-family: var(--font-mono); font-size: 0.72rem; opacity: 0.45; margin-top: 14px; }
 
@@ -488,10 +487,10 @@
   .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; margin-bottom: 28px; opacity: 0.75; }
   .back-link:hover { opacity: 1; }
   .product-view-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
-  .product-media { height: 460px; border-radius: 10px; background: linear-gradient(135deg, var(--coffee), var(--coffee-deep)); overflow: hidden; }
+  .product-media { height: 460px; border-radius: 4px; background: linear-gradient(135deg, var(--coffee), var(--coffee-deep)); overflow: hidden; }
   .product-media.tea { background: linear-gradient(135deg, var(--tea), var(--tea-deep)); }
   .product-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .product-info h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.7rem, 3vw, 2.3rem); margin: 0 0 8px; }
+  .product-info h1 { font-family: var(--font-display); font-weight: 300; font-size: clamp(1.7rem, 3vw, 2.3rem); margin: 0 0 8px; }
   .product-origin { opacity: 0.7; margin: 0 0 16px; }
   .product-info .data-strip { margin-bottom: 16px; }
   .product-description { opacity: 0.85; margin: 0 0 12px; }
@@ -508,16 +507,16 @@
     padding: 48px 0;
     border-bottom: 1px solid var(--line);
   }
-  .newsletter-band h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; margin: 0 0 4px; }
+  .newsletter-band h3 { font-family: var(--font-display); font-weight: 300; font-size: 1.3rem; margin: 0 0 4px; }
   .newsletter-band p { margin: 0; opacity: 0.65; font-size: 0.88rem; }
   .newsletter-form { display: flex; gap: 8px; flex: 1; max-width: 420px; min-width: 260px; }
   .newsletter-form input {
-    flex: 1; padding: 12px 14px; border: 1px solid var(--line); border-radius: 999px;
+    flex: 1; padding: 12px 14px; border: 1px solid var(--line); border-radius: 4px;
     background: var(--paper); font-size: 0.88rem;
   }
   .newsletter-form input:focus-visible { outline: 2px solid var(--coffee); outline-offset: 2px; }
   .newsletter-form button {
-    background: var(--ink); color: var(--paper); border: none; border-radius: 999px;
+    background: var(--ink); color: var(--paper); border: none; border-radius: 4px;
     padding: 12px 22px; font-weight: 600; font-size: 0.85rem; cursor: pointer; white-space: nowrap;
   }
   .form-msg { font-size: 0.78rem; margin-top: 8px; width: 100%; }
@@ -563,7 +562,7 @@
     position: relative;
     background: var(--paper-raised);
     max-width: 420px; width: 100%;
-    border-radius: 10px;
+    border-radius: 4px;
     padding: 36px 30px 28px;
   }
   .popup-close {
@@ -572,11 +571,11 @@
     width: 30px; height: 30px; border-radius: 50%;
   }
   .popup-close:hover { background: var(--paper); }
-  .popup h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; margin: 0 0 10px; }
+  .popup h3 { font-family: var(--font-display); font-weight: 300; font-size: 1.3rem; margin: 0 0 10px; }
   .popup p { margin: 0 0 18px; opacity: 0.75; font-size: 0.9rem; }
   .popup form { display: flex; flex-direction: column; gap: 10px; }
   .popup input {
-    padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; border: 1px solid var(--line); border-radius: 4px;
     background: var(--paper); font-size: 0.9rem;
   }
   .popup input:focus-visible { outline: 2px solid var(--coffee); outline-offset: 2px; }
@@ -603,13 +602,13 @@
   }
   .cart-drawer.open { transform: translateX(0); }
   .cart-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid var(--line); }
-  .cart-head h3 { font-family: var(--font-display); font-weight: 400; margin: 0; }
+  .cart-head h3 { font-family: var(--font-display); font-weight: 300; margin: 0; }
   .cart-head button { background: none; border: none; font-size: 1.2rem; cursor: pointer; width: 30px; height: 30px; border-radius: 50%; }
   .cart-head button:hover { background: var(--paper); }
   .cart-items { flex: 1; overflow-y: auto; padding: 16px 22px; }
   .cart-empty { opacity: 0.55; font-size: 0.88rem; text-align: center; margin-top: 40px; }
   .cart-line { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-  .cart-line .swatch-mini { width: 56px; height: 56px; border-radius: 6px; flex-shrink: 0; object-fit: cover; display: block; }
+  .cart-line .swatch-mini { width: 56px; height: 56px; border-radius: 4px; flex-shrink: 0; object-fit: cover; display: block; }
   .cart-line-info { flex: 1; min-width: 0; }
   .cart-line-info .name { font-size: 0.88rem; font-weight: 600; }
   .cart-line-info .qty-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
@@ -634,7 +633,7 @@
 
 <header class="site-nav" id="site-nav">
   <div class="wrap nav-inner">
-    <div class="brand">Ember <span class="amp">&</span> Leaf</div>
+    <div class="brand">Coffee <span class="amp">&</span> Tea</div>
     <nav class="main-links" aria-label="Main">
       <div class="nav-item" id="shop-nav-item">
         <button class="nav-link" id="shop-nav-btn" aria-haspopup="true" aria-expanded="false">Shop</button>
@@ -859,7 +858,7 @@
     </div>
 
     <div class="footer-legal">
-      <span>Ember & Leaf: placeholder copy, replace once brand details are confirmed.</span>
+      <span>Coffee & Tea</span>
       <div class="legal-links">
         <span class="link-disabled" aria-disabled="true">Privacy <em>coming soon</em></span>
         <span class="link-disabled" aria-disabled="true">Terms <em>coming soon</em></span>
@@ -1173,7 +1172,7 @@
     const isTea = featured.category === 'tea';
     wrap.innerHTML =
       '<div class="featured-media' + (isTea ? ' tea' : '') + '">' +
-        '<img style="width:100%;height:100%;object-fit:cover;border-radius:10px" src="' + (featured.image_key ? '/media/' + featured.image_key : '/media/marketing/product-placeholder.webp') + '" alt="' + escapeHtml(featured.name) + '">' +
+        '<img style="width:100%;height:100%;object-fit:cover;border-radius:4px" src="' + (featured.image_key ? '/media/' + featured.image_key : '/media/marketing/product-placeholder.webp') + '" alt="' + escapeHtml(featured.name) + '">' +
       '</div>' +
       '<div class="featured-copy">' +
         '<span class="eyebrow">Featured</span>' +
