@@ -290,11 +290,6 @@
   .mockup-story-copy .mockup-eyebrow { color: var(--ink); opacity: 0.55; }
   .mockup-story-p { font-family: var(--font-display); font-size: 0.85rem; line-height: 1.5; margin: 0; opacity: 0.9; }
 
-  .fallback-slot { display: flex; align-items: center; gap: 14px; padding: 14px; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px; max-width: 460px; }
-  .fallback-slot .mockup-drop { width: 64px; height: 64px; flex-shrink: 0; border-radius: 4px; }
-  .fallback-slot-copy .fs-title { font-weight: 600; font-size: 0.86rem; margin-bottom: 2px; }
-  .fallback-slot-copy .fs-desc { font-size: 0.78rem; opacity: 0.6; }
-
   /* ---------- Crop/reposition modal ---------- */
   .crop-modal-backdrop {
     display: none; position: fixed; inset: 0; background: rgba(20,16,12,0.6); z-index: 80;
@@ -486,7 +481,8 @@
         <button class="btn secondary" id="sitemedia-refresh-btn">Refresh</button>
       </div>
       <p style="opacity:0.7;font-size:0.88rem;max-width:70ch;margin-top:-6px">
-        This is a preview of your homepage. Switch between Desktop and Mobile,
+        This is a preview of your homepage. Desktop and Mobile each have their
+        own set of photos, so switch to the one you want to change first,
         then drag a photo onto any image below to replace it (or tap it to
         choose one from your device). It goes live right away.
       </p>
@@ -501,8 +497,6 @@
           <p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Loading…</p>
         </div>
       </div>
-
-      <div class="fallback-slot" id="fallback-slot" style="margin-top:16px"></div>
     </section>
 
     <!-- ---- Orders ----
@@ -897,6 +891,7 @@
   // at marketing/{slot}.webp immediately; no D1 row, no "save" step.
 
   let activeHeroSlot = 'hero-1';
+  let activeView = 'desktop';
 
   // Real copy pulled straight from site/index.html so switching hero slides
   // previews the actual headline/tint/button that ships with each photo.
@@ -911,7 +906,6 @@
     try {
       await api('/admin/site-media');
       renderSiteMockup();
-      renderFallbackSlot();
     } catch (err) {
       $('site-mockup-scroll').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Failed to load: ' + err.message + '</p>';
     }
@@ -927,10 +921,12 @@
 
   // A single photo IS the control: no separate thumbnail-plus-button pair
   // to parse. `innerExtra` carries slot-specific overlays (hero dots, tile name).
+  // Each slot has an independent image per view (activeView), matching the
+  // real site's own desktop/mobile breakpoint images.
   function mediaDropMarkup(slot, maxDim, extraClass, innerExtra) {
-    const src = '/media/marketing/' + slot + '.webp?t=' + Date.now();
+    const src = '/media/marketing/' + slot + '-' + activeView + '.webp?t=' + Date.now();
     return (
-      '<div class="mockup-drop' + (extraClass ? ' ' + extraClass : '') + '" data-slot="' + slot + '" data-maxdim="' + maxDim + '">' +
+      '<div class="mockup-drop' + (extraClass ? ' ' + extraClass : '') + '" data-slot="' + slot + '" data-variant="' + activeView + '" data-maxdim="' + maxDim + '">' +
         '<img src="' + src + '" alt="">' +
         (innerExtra || '') +
         '<div class="mockup-drop-badge">' + cameraBadgeIcon() + '</div>' +
@@ -998,16 +994,6 @@
     });
   }
 
-  function renderFallbackSlot() {
-    $('fallback-slot').innerHTML =
-      mediaDropMarkup('product-placeholder', 800) +
-      '<div class="fallback-slot-copy">' +
-        '<div class="fs-title">Default product photo</div>' +
-        '<div class="fs-desc">Not shown on the homepage itself. Used automatically for any product that doesn’t have its own photo yet.</div>' +
-      '</div>';
-    wireDropzones($('fallback-slot'));
-  }
-
   function wireDropzones(container) {
     container.querySelectorAll('.mockup-drop').forEach((zone) => {
       const input = zone.querySelector('.sitemedia-input');
@@ -1044,20 +1030,19 @@
   function handleSiteMediaFile(zone, file) {
     if (!file.type.startsWith('image/')) { showToast('That file isn’t a photo, try a JPG or PNG.'); return; }
     const rect = zone.getBoundingClientRect();
-    openCropModal(file, zone.dataset.slot, Number(zone.dataset.maxdim), rect.width / rect.height);
+    openCropModal(file, zone.dataset.slot, zone.dataset.variant, Number(zone.dataset.maxdim), rect.width / rect.height);
   }
 
   // ---------------- Crop/reposition modal ----------------
   // Lets a person frame the shot (pan + zoom) in the exact shape it'll be
   // used in, on whichever device view is currently active, before it's
-  // uploaded. Same shared image serves both Desktop and Mobile on the real
-  // site (there's no per-device variant), so a crop made in one view is a
-  // reasonable frame for the other, not a pixel-identical one.
+  // uploaded. Each slot has an independent desktop and mobile image, so this
+  // saves to whichever variant was active when the file was picked.
 
   let cropState = null;
   let cropDrag = null;
 
-  function openCropModal(file, slot, maxDim, aspect) {
+  function openCropModal(file, slot, variant, maxDim, aspect) {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
@@ -1069,7 +1054,7 @@
 
       const minScale = Math.max(stageW / img.naturalWidth, stageH / img.naturalHeight);
       cropState = {
-        slot, maxDim, aspect, url,
+        slot, variant, maxDim, aspect, url,
         naturalW: img.naturalWidth, naturalH: img.naturalHeight,
         stageW, stageH,
         scale: minScale, minScale, maxScale: minScale * 4,
@@ -1078,6 +1063,7 @@
       };
       $('crop-img').src = url;
       $('crop-zoom').value = 0;
+      $('crop-modal-sub').textContent = 'Drag to reposition, use the slider to zoom in. This saves as the ' + variant + ' photo only.';
       renderCropTransform();
       $('crop-modal-backdrop').classList.add('open');
       $('crop-modal').classList.add('open');
@@ -1142,18 +1128,19 @@
       s.naturalW * s.scale * outScale, s.naturalH * s.scale * outScale
     );
     const slot = s.slot;
+    const variant = s.variant;
     canvas.toBlob((blob) => {
       if (!blob) { showToast('Could not process that image.'); return; }
-      finishSiteMediaUpload(slot, blob);
+      finishSiteMediaUpload(slot, variant, blob);
       closeCropModal();
     }, 'image/webp', 0.85);
   });
 
-  async function finishSiteMediaUpload(slot, blob) {
+  async function finishSiteMediaUpload(slot, variant, blob) {
     const zone = document.querySelector('.mockup-drop[data-slot="' + slot + '"]');
     if (zone) zone.classList.add('uploading');
     try {
-      await api('/admin/site-media/' + slot, { method: 'POST', headers: { 'Content-Type': 'image/webp' }, body: blob });
+      await api('/admin/site-media/' + slot + '/' + variant, { method: 'POST', headers: { 'Content-Type': 'image/webp' }, body: blob });
       showToast('Photo updated.');
       await loadSiteMedia();
     } catch (err) {
@@ -1166,6 +1153,8 @@
     btn.addEventListener('click', () => {
       document.querySelectorAll('.view-switch-btn').forEach((b) => b.classList.toggle('active', b === btn));
       $('site-mockup').dataset.view = btn.dataset.view;
+      activeView = btn.dataset.view;
+      renderSiteMockup(); // reloads images/upload targets for the newly active variant
     });
   });
 

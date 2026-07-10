@@ -246,19 +246,37 @@
   }
   .hero-slide.active { opacity: 1; visibility: visible; }
   .hero-slide .slide-bg { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: center; }
+  /* Each hero slide has an independent desktop and mobile photo (admin-
+     managed under Site Media); swapped at the same breakpoint the
+     category tiles and story photo use below. */
   .hero-slide[data-slide="0"] .slide-bg {
-    background-image: linear-gradient(rgba(22,40,59,0.55), rgba(22,40,59,0.55)), url('/media/marketing/hero-1.webp');
+    background-image: linear-gradient(rgba(22,40,59,0.55), rgba(22,40,59,0.55)), url('/media/marketing/hero-1-desktop.webp');
   }
   .hero-slide[data-slide="1"] .slide-bg {
-    background-image: linear-gradient(rgba(122,90,27,0.55), rgba(122,90,27,0.55)), url('/media/marketing/hero-2.webp');
+    background-image: linear-gradient(rgba(122,90,27,0.55), rgba(122,90,27,0.55)), url('/media/marketing/hero-2-desktop.webp');
   }
   .hero-slide[data-slide="2"] .slide-bg {
-    background-image: linear-gradient(rgba(29,27,23,0.55), rgba(29,27,23,0.55)), url('/media/marketing/hero-3.webp');
+    background-image: linear-gradient(rgba(29,27,23,0.55), rgba(29,27,23,0.55)), url('/media/marketing/hero-3-desktop.webp');
   }
+  @media (max-width: 640px) {
+    .hero-slide[data-slide="0"] .slide-bg {
+      background-image: linear-gradient(rgba(22,40,59,0.55), rgba(22,40,59,0.55)), url('/media/marketing/hero-1-mobile.webp');
+    }
+    .hero-slide[data-slide="1"] .slide-bg {
+      background-image: linear-gradient(rgba(122,90,27,0.55), rgba(122,90,27,0.55)), url('/media/marketing/hero-2-mobile.webp');
+    }
+    .hero-slide[data-slide="2"] .slide-bg {
+      background-image: linear-gradient(rgba(29,27,23,0.55), rgba(29,27,23,0.55)), url('/media/marketing/hero-3-mobile.webp');
+    }
+  }
+  /* The hero centers its text using the same .wrap max-width/gutter pattern
+     as every other section, instead of a bespoke percentage-padding calc:
+     percentage padding on a flex item is a fragile combination across
+     browsers and was producing severe text-wrapping on some real devices. */
+  .hero-slide > .wrap { width: 100%; }
   .slide-content {
     position: relative; z-index: 1;
     max-width: 540px;
-    padding: 0 max(var(--gutter), calc((100% - 1180px) / 2 + var(--gutter)));
     color: var(--paper);
   }
   .slide-content h1 {
@@ -419,7 +437,7 @@
   .featured-band { background: var(--paper-raised); }
   .featured-inner {
     display: grid; grid-template-columns: 1fr 1fr;
-    gap: 48px; align-items: center;
+    gap: 20px; align-items: center;
   }
   .featured-media {
     height: 380px; border-radius: 4px;
@@ -447,14 +465,22 @@
   .category-tile:hover { transform: translateY(-3px); }
   .category-tile:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   .category-tile.coffee {
-    background-image: linear-gradient(rgba(22,40,59,0.72), rgba(22,40,59,0.72)), url('/media/marketing/category-coffee.webp');
+    background-image: linear-gradient(rgba(22,40,59,0.72), rgba(22,40,59,0.72)), url('/media/marketing/category-coffee-desktop.webp');
     background-size: cover;
     background-position: center;
   }
   .category-tile.tea {
-    background-image: linear-gradient(rgba(122,90,27,0.72), rgba(122,90,27,0.72)), url('/media/marketing/category-tea.webp');
+    background-image: linear-gradient(rgba(122,90,27,0.72), rgba(122,90,27,0.72)), url('/media/marketing/category-tea-desktop.webp');
     background-size: cover;
     background-position: center;
+  }
+  @media (max-width: 640px) {
+    .category-tile.coffee {
+      background-image: linear-gradient(rgba(22,40,59,0.72), rgba(22,40,59,0.72)), url('/media/marketing/category-coffee-mobile.webp');
+    }
+    .category-tile.tea {
+      background-image: linear-gradient(rgba(122,90,27,0.72), rgba(122,90,27,0.72)), url('/media/marketing/category-tea-mobile.webp');
+    }
   }
   .tile-label { font-family: var(--font-display); font-size: 1.4rem; font-weight: 300; }
   .tile-sub { font-size: 0.85rem; opacity: 0.85; }
@@ -670,30 +696,30 @@
   <section class="hero-carousel" id="hero" aria-roledescription="carousel" aria-label="Featured">
     <div class="hero-slide active" data-slide="0">
       <div class="slide-bg"></div>
-      <div class="slide-content">
+      <div class="wrap"><div class="slide-content">
         <span class="eyebrow" style="opacity:0.85">Roasted in small batches</span>
         <h1>Small batches, honest sourcing.</h1>
         <p>Origin, altitude, and process on every bag, because the details change how it tastes.</p>
         <button class="btn-primary" data-goto="coffee">Shop coffee</button>
-      </div>
+      </div></div>
     </div>
     <div class="hero-slide" data-slide="1">
       <div class="slide-bg"></div>
-      <div class="slide-content">
+      <div class="wrap"><div class="slide-content">
         <span class="eyebrow" style="opacity:0.85">Steeped, not guessed</span>
         <h1>Tea sourced the same way we source coffee.</h1>
         <p>Same rigor, same transparency: leaf type, oxidation, and where it grew.</p>
         <button class="btn-primary" data-goto="tea">Shop tea</button>
-      </div>
+      </div></div>
     </div>
     <div class="hero-slide" data-slide="2">
       <div class="slide-bg"></div>
-      <div class="slide-content">
+      <div class="wrap"><div class="slide-content">
         <span class="eyebrow" style="opacity:0.85">Small batch, always fresh</span>
         <h1>Start with what everyone's reaching for.</h1>
         <p>The lots and leaves that sell out first, restocked in small runs, not warehoused.</p>
         <button class="btn-primary" data-goto="best-sellers">Shop best sellers</button>
-      </div>
+      </div></div>
     </div>
 
     <button class="hero-arrow prev" id="hero-prev" aria-label="Previous slide">&lsaquo;</button>
@@ -747,7 +773,10 @@
   <section class="section story-band fade-section">
     <div class="wrap story-inner">
       <div class="story-media">
-        <img src="/media/marketing/brand-story.webp" alt="" loading="lazy">
+        <picture>
+          <source media="(max-width: 640px)" srcset="/media/marketing/brand-story-mobile.webp">
+          <img src="/media/marketing/brand-story-desktop.webp" alt="" loading="lazy">
+        </picture>
       </div>
       <div class="story-copy">
         <span class="eyebrow">Our approach</span>

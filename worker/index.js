@@ -21,11 +21,14 @@
  *   POST   /api/newsletter/subscribe        add an email to the list           (public)
  *   GET    /api/admin/newsletter/subscribers list subscribers                  [auth]
  *   DELETE /api/admin/newsletter/subscribers/:email  remove a subscriber       [auth]
- *   GET    /api/admin/site-media            status of every homepage image slot [auth]
- *   POST   /api/admin/site-media/:slot      replace a homepage image slot       [auth]
+ *   GET    /api/admin/site-media                  list of every homepage image slot   [auth]
+ *   POST   /api/admin/site-media/:slot/:variant   replace one slot's desktop or
+ *                                                  mobile image                        [auth]
  *          (slots: hero-1, hero-2, hero-3, category-coffee, category-tea,
- *          brand-story, product-placeholder; see SITE_MEDIA_SLOTS below.
- *          Publicly served at /media/marketing/{slot}.webp, same R2 proxy
+ *          brand-story; variant: desktop|mobile; see SITE_MEDIA_SLOTS below.
+ *          Each slot has two independent images, one per variant, so mobile
+ *          and desktop visitors can see different crops/photos. Publicly
+ *          served at /media/marketing/{slot}-{variant}.webp, same R2 proxy
  *          serveMedia() already uses for product photos.)
  *
  * Required secrets (wrangler secret put <NAME>):
@@ -39,13 +42,20 @@
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
 
-// Fixed set of homepage image slots an admin can customize. Each is stored
-// in R2 at marketing/{slot}.webp and served publicly via the existing
-// /media/* proxy, the same mechanism product photos use, just a fixed key
-// instead of one keyed by product id. Adding a slot here + wiring the CSS
-// url() or <img src> to /media/marketing/{slot}.webp in site/index.html is
-// the whole integration; no D1 table needed since the "current" image is
-// just whatever R2 object currently lives at that key.
+// Fixed set of homepage image slots an admin can customize. Each slot has
+// two independent R2 objects, marketing/{slot}-desktop.webp and
+// marketing/{slot}-mobile.webp, served publicly via the existing /media/*
+// proxy (same mechanism product photos use, just a fixed key instead of one
+// keyed by product id). site/index.html picks the right one per breakpoint
+// via CSS media queries (or <picture> for the brand-story <img>). No D1
+// table needed since the "current" image is just whatever R2 object
+// currently lives at that key.
+//
+// product-placeholder (the no-photo fallback used elsewhere for products
+// without their own photo) is intentionally not managed here for now; it
+// has no fixed spot on the homepage layout, so it was pulled from this
+// admin panel. The underlying /media/marketing/product-placeholder.webp
+// file and its use as a fallback elsewhere are untouched.
 const SITE_MEDIA_SLOTS = [
   { slot: "hero-1", label: "Hero slide 1 (Coffee)", maxDim: 1600 },
   { slot: "hero-2", label: "Hero slide 2 (Tea)", maxDim: 1600 },
@@ -53,9 +63,9 @@ const SITE_MEDIA_SLOTS = [
   { slot: "category-coffee", label: "Category tile: Coffee", maxDim: 800 },
   { slot: "category-tea", label: "Category tile: Tea", maxDim: 800 },
   { slot: "brand-story", label: "Brand story image", maxDim: 1200 },
-  { slot: "product-placeholder", label: "Product placeholder (no-photo fallback)", maxDim: 800 },
 ];
 const SITE_MEDIA_SLOT_KEYS = new Set(SITE_MEDIA_SLOTS.map((s) => s.slot));
+const SITE_MEDIA_VARIANTS = new Set(["desktop", "mobile"]);
 
 export default {
   async fetch(request, env, ctx) {
@@ -146,9 +156,11 @@ async function routeApi(request, env, url) {
   if (method === "GET" && pathname === "/api/admin/site-media") {
     return listSiteMedia(env);
   }
-  if (method === "POST" && /^\/api\/admin\/site-media\/[\w-]+$/.test(pathname)) {
-    const slot = pathname.split("/").pop();
-    return uploadSiteMedia(request, env, slot);
+  if (method === "POST" && /^\/api\/admin\/site-media\/[\w-]+\/(desktop|mobile)$/.test(pathname)) {
+    const parts = pathname.split("/");
+    const variant = parts.pop();
+    const slot = parts.pop();
+    return uploadSiteMedia(request, env, slot, variant);
   }
 
   return json({ error: "Not found" }, 404);
@@ -519,33 +531,22 @@ async function deleteNewsletterSubscriber(env, email) {
 
 // ---------------------------------------------------------------------------
 // Site media: admin-customizable homepage images (hero, category tiles,
-// brand story, product placeholder). Fixed R2 keys, no D1 row involved.
+// brand story), each with independent desktop and mobile variants.
+// Fixed R2 keys, no D1 row involved.
 // ---------------------------------------------------------------------------
 
 async function listSiteMedia(env) {
-  const slots = await Promise.all(
-    SITE_MEDIA_SLOTS.map(async (def) => {
-      const key = `marketing/${def.slot}.webp`;
-      const head = await env.MEDIA.head(key);
-      return {
-        slot: def.slot,
-        label: def.label,
-        maxDim: def.maxDim,
-        key,
-        exists: !!head,
-        uploaded: head ? head.uploaded : null,
-        size: head ? head.size : null,
-      };
-    })
-  );
-  return json({ slots });
+  return json({ slots: SITE_MEDIA_SLOTS });
 }
 
-async function uploadSiteMedia(request, env, slot) {
+async function uploadSiteMedia(request, env, slot, variant) {
   if (!SITE_MEDIA_SLOT_KEYS.has(slot)) {
     return json({ error: "Unknown slot: " + slot }, 400);
   }
-  const key = `marketing/${slot}.webp`;
+  if (!SITE_MEDIA_VARIANTS.has(variant)) {
+    return json({ error: "Unknown variant: " + variant }, 400);
+  }
+  const key = `marketing/${slot}-${variant}.webp`;
   await env.MEDIA.put(key, request.body, {
     httpMetadata: { contentType: "image/webp" },
   });
