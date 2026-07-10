@@ -603,22 +603,29 @@
     box-shadow: -8px 0 30px rgba(29,27,23,0.15);
   }
   .cart-drawer.open { transform: translateX(0); }
-  .cart-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid var(--line); }
-  .cart-head h3 { font-family: var(--font-display); font-weight: 300; margin: 0; }
-  .cart-head button { background: none; border: none; font-size: 1.2rem; cursor: pointer; width: 30px; height: 30px; border-radius: 50%; }
-  .cart-head button:hover { background: var(--paper); }
-  .cart-items { flex: 1; overflow-y: auto; padding: 16px 22px; }
-  .cart-empty { opacity: 0.55; font-size: 0.88rem; text-align: center; margin-top: 40px; }
-  .cart-line { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-  .cart-line .swatch-mini { width: 56px; height: 56px; border-radius: 4px; flex-shrink: 0; object-fit: cover; display: block; }
-  .cart-line-info { flex: 1; min-width: 0; }
-  .cart-line-info .name { font-size: 0.88rem; font-weight: 600; }
-  .cart-line-info .qty-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-  .qty-btn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); background: none; cursor: pointer; font-size: 0.8rem; line-height: 1; }
-  .cart-line-remove { background: none; border: none; font-size: 0.72rem; opacity: 0.5; cursor: pointer; text-decoration: underline; margin-top: 4px; }
-  .cart-footer { padding: 18px 22px 24px; border-top: 1px solid var(--line); }
+  .cart-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+  .cart-head h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.05rem; margin: 0; }
+  .cart-head button { background: none; border: none; font-size: 1.1rem; opacity: 0.6; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; }
+  .cart-head button:hover { opacity: 1; background: var(--paper); }
+  .cart-items { flex: 1; overflow-y: auto; padding: 4px 20px; }
+  .cart-empty { opacity: 0.5; font-size: 0.86rem; text-align: center; margin-top: 40px; }
+  .cart-line { display: flex; align-items: flex-start; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .cart-line:last-child { border-bottom: none; }
+  .cart-line .swatch-mini { width: 48px; height: 48px; border-radius: 4px; flex-shrink: 0; object-fit: cover; display: block; }
+  .cart-line-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .cart-line-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .cart-line-top .name { font-size: 0.86rem; font-weight: 500; line-height: 1.35; }
+  .cart-line-top .cart-line-price { font-weight: 700; font-size: 0.86rem; white-space: nowrap; }
+  .cart-line-bottom { display: flex; align-items: center; justify-content: space-between; }
+  .qty-row { display: flex; align-items: center; gap: 12px; }
+  .qty-btn { width: 20px; height: 20px; padding: 0; border: none; background: none; opacity: 0.55; cursor: pointer; font-size: 0.95rem; line-height: 1; display: flex; align-items: center; justify-content: center; }
+  .qty-btn:hover { opacity: 1; }
+  .qty-row .qty-value { font-size: 0.82rem; min-width: 12px; text-align: center; }
+  .cart-line-remove { background: none; border: none; font-size: 0.74rem; opacity: 0.4; cursor: pointer; }
+  .cart-line-remove:hover { opacity: 0.9; text-decoration: underline; }
+  .cart-footer { padding: 16px 20px 22px; border-top: 1px solid var(--line); }
   .cart-subtotal { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 14px; }
-  .cart-footer .btn-primary[disabled] { opacity: 0.55; }
+  .cart-footer .btn-primary[disabled] { opacity: 0.5; }
 
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; scroll-behavior: auto !important; animation: none !important; }
@@ -1285,14 +1292,18 @@
       '<div class="cart-line">' +
         '<img class="swatch-mini" src="' + (c.thumb_key ? '/media/' + c.thumb_key : '/media/marketing/product-placeholder.webp') + '" alt="">' +
         '<div class="cart-line-info">' +
-          '<div class="name">' + escapeHtml(c.name) + '</div>' +
-          '<div class="qty-row">' +
-            '<button class="qty-btn" data-qty-minus="' + c.id + '" aria-label="Decrease quantity">&minus;</button>' +
-            '<span>' + c.qty + '</span>' +
-            '<button class="qty-btn" data-qty-plus="' + c.id + '" aria-label="Increase quantity">+</button>' +
-            '<span style="margin-left:auto;font-family:var(--font-body);font-weight:700;font-size:0.85rem">' + formatPrice(c.price_cents * c.qty, c.currency) + '</span>' +
+          '<div class="cart-line-top">' +
+            '<span class="name">' + escapeHtml(c.name) + '</span>' +
+            '<span class="cart-line-price">' + formatPrice(c.price_cents * c.qty, c.currency) + '</span>' +
           '</div>' +
-          '<button class="cart-line-remove" data-remove="' + c.id + '">Remove</button>' +
+          '<div class="cart-line-bottom">' +
+            '<div class="qty-row">' +
+              '<button class="qty-btn" data-qty-minus="' + c.id + '" aria-label="Decrease quantity">&minus;</button>' +
+              '<span class="qty-value">' + c.qty + '</span>' +
+              '<button class="qty-btn" data-qty-plus="' + c.id + '" aria-label="Increase quantity">+</button>' +
+            '</div>' +
+            '<button class="cart-line-remove" data-remove="' + c.id + '">Remove</button>' +
+          '</div>' +
         '</div>' +
       '</div>'
     )).join('');

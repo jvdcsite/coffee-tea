@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Admin | Coffee & Tea</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=DM+Sans:wght@400;500;600;700&display=swap">
 <style>
@@ -81,14 +81,18 @@
     background: var(--paper-raised);
     border-right: 1px solid var(--line);
     display: flex; flex-direction: column;
-    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    position: sticky; top: 0; height: 100vh; height: 100dvh; overflow-y: auto;
     z-index: 30;
   }
   .sidebar-brand { padding: 20px 16px 14px; border-bottom: 1px solid var(--line); }
   .sidebar-brand .brand-mark { display: block; font-family: var(--font-display); font-size: 1.05rem; line-height: 1.2; }
   .sidebar-brand .brand-sub { display: block; font-family: var(--font-body); font-weight: 600; font-size: 0.68rem; opacity: 0.5; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
   .sidebar-nav { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
-  .sidebar-footer { padding: 10px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+  .sidebar-footer {
+    padding: 10px; padding-bottom: max(10px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px;
+    flex-shrink: 0;
+  }
 
   .nav-item {
     display: flex; align-items: center; gap: 10px;
@@ -127,7 +131,7 @@
 
   @media (max-width: 880px) {
     .sidebar {
-      position: fixed; top: 0; left: 0; height: 100vh;
+      position: fixed; top: 0; left: 0; height: 100vh; height: 100dvh;
       transform: translateX(-100%);
       transition: transform 0.22s ease;
       box-shadow: 2px 0 16px rgba(0,0,0,0.14);
@@ -175,12 +179,40 @@
   .live-preview-viewport { overflow: hidden; }
   .live-preview-viewport iframe { border: none; display: block; transform-origin: top left; pointer-events: none; }
 
+  .media-group { margin-bottom: 30px; }
+  .media-group-head { margin-bottom: 12px; }
+  .media-group-head h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 400; margin-bottom: 3px; }
+  .media-group-head p { font-size: 0.82rem; opacity: 0.65; margin: 0; max-width: 60ch; }
+
   .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-  .media-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px; padding: 14px; }
-  .media-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 4px; background: var(--paper); margin-bottom: 10px; display: block; }
-  .media-card .media-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 2px; }
-  .media-card .media-meta { font-size: 0.7rem; opacity: 0.5; font-family: var(--font-body); margin-bottom: 10px; }
-  .media-card input[type="file"] { width: 100%; font-size: 0.78rem; }
+  .media-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
+  .media-thumb { position: relative; margin-bottom: 10px; }
+  .media-thumb img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 4px; background: var(--paper); display: block; }
+  .media-thumb .media-uploading-veil {
+    position: absolute; inset: 0; border-radius: 4px;
+    background: rgba(243,238,227,0.85);
+    display: none; align-items: center; justify-content: center;
+    font-size: 0.78rem; font-weight: 600;
+  }
+  .media-thumb.uploading .media-uploading-veil { display: flex; }
+  .media-upload-btn {
+    position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(29,27,23,0.85); color: #fff;
+    padding: 7px 14px; border-radius: 999px;
+    font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
+  }
+  .media-upload-btn:hover { background: var(--ink); transform: translateX(-50%) translateY(-1px); }
+  .media-upload-btn svg { flex-shrink: 0; }
+  .media-upload-btn input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .media-card .media-label { font-weight: 600; font-size: 0.88rem; margin-bottom: 3px; }
+  .media-card .media-hint { font-size: 0.76rem; opacity: 0.6; line-height: 1.4; margin-bottom: 4px; }
+  .media-card .media-meta { font-size: 0.7rem; opacity: 0.45; font-family: var(--font-body); }
+  .media-card .media-meta.is-updated { opacity: 1; color: var(--coffee); font-weight: 600; }
 
   @media (max-width: 640px) {
     .live-preview-wrap { justify-content: center; }
@@ -354,10 +386,9 @@
         <button class="btn secondary" id="sitemedia-refresh-btn">Refresh</button>
       </div>
       <p style="opacity:0.7;font-size:0.88rem;max-width:70ch;margin-top:-6px">
-        These are the images used across the homepage: hero slides, category tiles,
-        the brand-story photo, and the fallback image shown for products with no
-        photo yet. Pick a replacement below and it goes live immediately, no redeploy
-        needed. Uploads are resized in your browser first, same as product photos.
+        These are the photos shown on your homepage, grouped by where they appear
+        below. Tap "Change photo" under any image to replace it — your new photo
+        goes live right away, no other steps needed.
       </p>
 
       <div class="live-preview-wrap">
@@ -755,6 +786,18 @@
 
   let siteMediaSlots = [];
 
+  // Plain-language grouping + guidance for beginners; the server's `label`
+  // stays as the technical fallback title if a slot isn't in this map.
+  const SITE_MEDIA_COPY = {
+    'hero-1': { group: 'Homepage banner', groupDesc: 'These three photos rotate automatically at the very top of your homepage.', title: 'Banner photo 1 of 3', hint: 'A bright, wide photo works best.' },
+    'hero-2': { group: 'Homepage banner', title: 'Banner photo 2 of 3', hint: 'A bright, wide photo works best.' },
+    'hero-3': { group: 'Homepage banner', title: 'Banner photo 3 of 3', hint: 'A bright, wide photo works best.' },
+    'category-coffee': { group: 'Category tiles', groupDesc: 'Shown on the two tiles that link visitors to your Coffee and Tea sections.', title: 'Coffee tile photo', hint: 'A square-ish photo works best.' },
+    'category-tea': { group: 'Category tiles', title: 'Tea tile photo', hint: 'A square-ish photo works best.' },
+    'brand-story': { group: 'Your story', groupDesc: 'Shown next to the paragraph about your shop and sourcing.', title: 'Story photo', hint: 'Any clear photo works.' },
+    'product-placeholder': { group: 'Default product photo', groupDesc: 'Used automatically for any product that doesn’t have its own photo yet.', title: 'Fallback photo', hint: 'A neutral, simple photo works best.' },
+  };
+
   async function loadSiteMedia() {
     $('sitemedia-grid').innerHTML = '<p style="opacity:0.6;font-size:0.85rem">Loading…</p>';
     try {
@@ -767,15 +810,44 @@
     }
   }
 
+  function cameraIcon() {
+    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="14" r="3.5"/></svg>';
+  }
+
   function renderSiteMediaGrid() {
-    $('sitemedia-grid').innerHTML = siteMediaSlots.map((s) => (
-      '<div class="media-card">' +
-        '<img src="/media/marketing/' + s.slot + '.webp?t=' + Date.now() + '" alt="">' +
-        '<div class="media-label">' + escapeHtml(s.label) + '</div>' +
-        '<div class="media-meta">max ' + s.maxDim + 'px' + (s.uploaded ? ' · updated ' + new Date(s.uploaded).toLocaleDateString() : ' · using default') + '</div>' +
-        '<input type="file" accept="image/*" data-slot="' + s.slot + '" data-maxdim="' + s.maxDim + '" class="sitemedia-input">' +
-      '</div>'
-    )).join('');
+    let lastGroup = null;
+    const parts = [];
+    siteMediaSlots.forEach((s) => {
+      const copy = SITE_MEDIA_COPY[s.slot] || { group: s.label, title: s.label, hint: 'At least ' + s.maxDim + 'px wide works best.' };
+      if (copy.group !== lastGroup) {
+        if (lastGroup !== null) parts.push('</div></div>');
+        parts.push(
+          '<div class="media-group"><div class="media-group-head"><h3>' + escapeHtml(copy.group) + '</h3>' +
+          (copy.groupDesc ? '<p>' + escapeHtml(copy.groupDesc) + '</p>' : '') +
+          '</div><div class="media-grid">'
+        );
+        lastGroup = copy.group;
+      }
+      const updatedText = s.uploaded
+        ? 'Last updated ' + new Date(s.uploaded).toLocaleDateString()
+        : 'Using the starting default photo';
+      parts.push(
+        '<div class="media-card" data-slot="' + s.slot + '">' +
+          '<div class="media-thumb">' +
+            '<img src="/media/marketing/' + s.slot + '.webp?t=' + Date.now() + '" alt="">' +
+            '<div class="media-uploading-veil">Uploading…</div>' +
+            '<label class="media-upload-btn">' + cameraIcon() + ' Change photo' +
+              '<input type="file" accept="image/*" data-slot="' + s.slot + '" data-maxdim="' + s.maxDim + '" class="sitemedia-input">' +
+            '</label>' +
+          '</div>' +
+          '<div class="media-label">' + escapeHtml(copy.title) + '</div>' +
+          '<div class="media-hint">' + escapeHtml(copy.hint) + '</div>' +
+          '<div class="media-meta">' + escapeHtml(updatedText) + '</div>' +
+        '</div>'
+      );
+    });
+    if (lastGroup !== null) parts.push('</div></div>');
+    $('sitemedia-grid').innerHTML = parts.join('');
     $('sitemedia-grid').querySelectorAll('.sitemedia-input').forEach((input) => {
       input.addEventListener('change', () => {
         if (input.files[0]) uploadSiteMediaSlot(input.dataset.slot, Number(input.dataset.maxdim), input.files[0]);
@@ -784,14 +856,17 @@
   }
 
   async function uploadSiteMediaSlot(slot, maxDim, file) {
-    showToast('Uploading…');
+    const card = $('sitemedia-grid').querySelector('.media-card[data-slot="' + slot + '"]');
+    const thumb = card ? card.querySelector('.media-thumb') : null;
+    if (thumb) thumb.classList.add('uploading');
     try {
       const webp = await resizeToWebp(file, maxDim);
       await api('/admin/site-media/' + slot, { method: 'POST', headers: { 'Content-Type': 'image/webp' }, body: webp });
-      showToast('Updated.');
+      showToast('Photo updated.');
       await loadSiteMedia();
       refreshLivePreviews();
     } catch (err) {
+      if (thumb) thumb.classList.remove('uploading');
       showToast('Upload failed: ' + err.message);
     }
   }
