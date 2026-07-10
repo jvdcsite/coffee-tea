@@ -173,18 +173,22 @@
 
   /* Desktop / Mobile switcher, controls the .site-mockup[data-view] below.
      This is a manual toggle, not a responsive breakpoint. */
-  .view-switch { display: inline-flex; gap: 3px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 3px; margin: 18px 0 4px; }
-  .view-switch-btn { border: none; background: transparent; padding: 7px 16px; border-radius: 999px; font-weight: 600; font-size: 0.82rem; cursor: pointer; color: var(--ink); opacity: 0.6; }
+  .view-switch { display: inline-flex; gap: 3px; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 3px; margin: 18px 0 4px; }
+  .view-switch-btn { border: none; background: transparent; padding: 7px 16px; border-radius: 3px; font-weight: 600; font-size: 0.82rem; cursor: pointer; color: var(--ink); opacity: 0.6; }
   .view-switch-btn.active { background: var(--ink); color: var(--paper); opacity: 1; }
 
   .mockup-help { font-size: 0.82rem; opacity: 0.6; max-width: 60ch; margin: 8px 0 18px; }
 
+  /* A device-sized, self-scrolling window rather than an ever-growing block:
+     each view gets its actual typical width, with a capped height and its
+     own scrollbar, like looking at a real phone or laptop screen. */
   .site-mockup {
-    border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
-    background: #fff; margin: 0 0 10px; transition: max-width 0.2s ease;
+    border: 1px solid var(--line); border-radius: 4px; overflow: hidden;
+    background: #fff; margin: 0 0 10px;
   }
-  .site-mockup[data-view="desktop"] { max-width: 640px; }
-  .site-mockup[data-view="mobile"] { max-width: 300px; }
+  .site-mockup-scroll { overflow-y: auto; overflow-x: hidden; max-height: 620px; }
+  .site-mockup[data-view="desktop"] { width: 100%; max-width: 900px; }
+  .site-mockup[data-view="mobile"] { width: 375px; max-width: 100%; }
 
   /* Real chrome above the fold, for orientation only (not interactive). */
   .mockup-utility {
@@ -209,7 +213,7 @@
      need a hover state to discover it. */
   .mockup-drop-badge {
     position: absolute; bottom: 8px; right: 8px; z-index: 3;
-    width: 30px; height: 30px; border-radius: 50%;
+    width: 30px; height: 30px; border-radius: 4px;
     background: rgba(29,27,23,0.72); color: #fff;
     display: flex; align-items: center; justify-content: center;
     transition: opacity 0.15s ease;
@@ -240,9 +244,11 @@
   .mockup-drop.uploading .ov-uploading { display: block; }
 
   /* Hero: matches the real per-slide color tint + left-aligned copy block,
-     so switching slides previews the actual headline/button that goes with it. */
-  .mockup-hero { aspect-ratio: 21 / 10; }
-  .site-mockup[data-view="mobile"] .mockup-hero { aspect-ratio: 3 / 4; }
+     so switching slides previews the actual headline/button that goes with it.
+     Ratios approximate the real site's height:min(70vh,620px) rule at a
+     typical viewport size for each device. */
+  .mockup-hero { aspect-ratio: 21 / 9; }
+  .site-mockup[data-view="mobile"] .mockup-hero { aspect-ratio: 2 / 3; }
   .mockup-hero-tint { position: absolute; inset: 0; z-index: 1; }
   .mockup-hero-copy {
     position: absolute; inset: 0; z-index: 2; color: #fff;
@@ -263,27 +269,54 @@
   }
   .hero-dot-btn.active { background: #fff; color: var(--ink); border-color: #fff; }
 
-  /* Category tiles: tinted background + baked-in label, top-left like the real site. */
+  /* Category tiles: on the real site these are short, wide banners set by
+     padding + text content, not squares; approximated here as a fixed ratio. */
   .mockup-tiles { display: flex; }
   .site-mockup[data-view="mobile"] .mockup-tiles { flex-direction: column; }
-  .mockup-tile { flex: 1; aspect-ratio: 4 / 3; }
+  .mockup-tile { flex: 1; aspect-ratio: 15 / 4; }
+  .site-mockup[data-view="mobile"] .mockup-tile { aspect-ratio: 7 / 3; }
   .mockup-tile-tint { position: absolute; inset: 0; z-index: 1; }
   .mockup-tile-copy { position: relative; z-index: 2; color: #fff; padding: 16px; display: flex; flex-direction: column; gap: 3px; }
   .mockup-tile-label { font-family: var(--font-display); font-weight: 300; font-size: 1.05rem; }
   .mockup-tile-sub { font-size: 0.68rem; opacity: 0.9; }
 
-  /* Brand story: real image + real paragraph side by side (stacked on mobile). */
+  /* Brand story: real image + real paragraph side by side (stacked on mobile),
+     matching the real site's max-height:400px/260px image crop. */
   .mockup-story-band { display: flex; border-top: 1px solid var(--line); }
   .site-mockup[data-view="mobile"] .mockup-story-band { flex-direction: column; }
-  .mockup-story-img { flex: 1; aspect-ratio: 4 / 3; }
+  .mockup-story-img { flex: 1; aspect-ratio: 5 / 4; }
+  .site-mockup[data-view="mobile"] .mockup-story-img { aspect-ratio: 6 / 5; }
   .mockup-story-copy { flex: 1; padding: 18px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
   .mockup-story-copy .mockup-eyebrow { color: var(--ink); opacity: 0.55; }
   .mockup-story-p { font-family: var(--font-display); font-size: 0.85rem; line-height: 1.5; margin: 0; opacity: 0.9; }
 
-  .fallback-slot { display: flex; align-items: center; gap: 14px; padding: 14px; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; max-width: 460px; }
-  .fallback-slot .mockup-drop { width: 64px; height: 64px; flex-shrink: 0; border-radius: 6px; }
+  .fallback-slot { display: flex; align-items: center; gap: 14px; padding: 14px; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px; max-width: 460px; }
+  .fallback-slot .mockup-drop { width: 64px; height: 64px; flex-shrink: 0; border-radius: 4px; }
   .fallback-slot-copy .fs-title { font-weight: 600; font-size: 0.86rem; margin-bottom: 2px; }
   .fallback-slot-copy .fs-desc { font-size: 0.78rem; opacity: 0.6; }
+
+  /* ---------- Crop/reposition modal ---------- */
+  .crop-modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(20,16,12,0.6); z-index: 80;
+  }
+  .crop-modal-backdrop.open { display: block; }
+  .crop-modal {
+    display: none; position: fixed; z-index: 81; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px;
+    padding: 20px; width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 40px); overflow-y: auto;
+  }
+  .crop-modal.open { display: block; }
+  .crop-modal h3 { font-size: 1.05rem; margin-bottom: 4px; }
+  .crop-modal p { font-size: 0.82rem; opacity: 0.6; margin: 0 0 14px; }
+  .crop-stage {
+    position: relative; overflow: hidden; background: #16130f; border-radius: 4px;
+    width: 100%; margin: 0 auto; touch-action: none; cursor: grab;
+  }
+  .crop-stage:active { cursor: grabbing; }
+  .crop-stage img { position: absolute; top: 0; left: 0; max-width: none; user-select: none; transform-origin: 0 0; }
+  .crop-zoom-row { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; font-weight: 600; margin-top: 14px; }
+  .crop-zoom-row input[type="range"] { flex: 1; }
+  .crop-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 
   .toast {
     position: fixed; bottom: 20px; right: 20px;
@@ -464,7 +497,9 @@
       </div>
 
       <div class="site-mockup" id="site-mockup" data-view="desktop">
-        <p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Loading…</p>
+        <div class="site-mockup-scroll" id="site-mockup-scroll">
+          <p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Loading…</p>
+        </div>
       </div>
 
       <div class="fallback-slot" id="fallback-slot" style="margin-top:16px"></div>
@@ -540,6 +575,24 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ================= Photo crop/reposition modal ================= -->
+<div class="crop-modal-backdrop" id="crop-modal-backdrop"></div>
+<div class="crop-modal" id="crop-modal" role="dialog" aria-modal="true" aria-label="Adjust photo">
+  <h3>Adjust photo</h3>
+  <p id="crop-modal-sub">Drag to reposition, use the slider to zoom in.</p>
+  <div class="crop-stage" id="crop-stage">
+    <img id="crop-img" alt="" draggable="false">
+  </div>
+  <label class="crop-zoom-row">
+    Zoom
+    <input type="range" id="crop-zoom" min="0" max="100" value="0">
+  </label>
+  <div class="crop-modal-actions">
+    <button class="btn secondary" id="crop-cancel-btn">Cancel</button>
+    <button class="btn" id="crop-save-btn">Save photo</button>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -854,13 +907,13 @@
   };
 
   async function loadSiteMedia() {
-    $('site-mockup').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Loading…</p>';
+    $('site-mockup-scroll').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Loading…</p>';
     try {
       await api('/admin/site-media');
       renderSiteMockup();
       renderFallbackSlot();
     } catch (err) {
-      $('site-mockup').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Failed to load: ' + err.message + '</p>';
+      $('site-mockup-scroll').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Failed to load: ' + err.message + '</p>';
     }
   }
 
@@ -915,7 +968,7 @@
       '<div class="mockup-tile-tint" style="background:rgba(122,90,27,0.72)"></div>' +
       '<div class="mockup-tile-copy"><span class="mockup-tile-label">Tea</span><span class="mockup-tile-sub">Browse all tea</span></div>';
 
-    $('site-mockup').innerHTML =
+    $('site-mockup-scroll').innerHTML =
       '<div class="mockup-utility">Free shipping on orders over $40</div>' +
       '<div class="mockup-topbar">' +
         '<span class="mockup-brand">Coffee <span class="amp">&amp;</span> Tea</span>' +
@@ -935,8 +988,8 @@
         '</div>' +
       '</div>';
 
-    wireDropzones($('site-mockup'));
-    $('site-mockup').querySelectorAll('.hero-dot-btn').forEach((btn) => {
+    wireDropzones($('site-mockup-scroll'));
+    $('site-mockup-scroll').querySelectorAll('.hero-dot-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         activeHeroSlot = btn.dataset.heroSlot;
@@ -959,7 +1012,8 @@
     container.querySelectorAll('.mockup-drop').forEach((zone) => {
       const input = zone.querySelector('.sitemedia-input');
       input.addEventListener('change', () => {
-        if (input.files[0]) uploadSiteMediaSlot(zone.dataset.slot, Number(zone.dataset.maxdim), input.files[0]);
+        if (input.files[0]) handleSiteMediaFile(zone, input.files[0]);
+        input.value = '';
       });
       zone.addEventListener('click', (e) => {
         if (e.target.closest('.hero-dot-btn')) return;
@@ -982,18 +1036,124 @@
         dragDepth = 0;
         zone.classList.remove('drag-over');
         const file = e.dataTransfer.files && e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) uploadSiteMediaSlot(zone.dataset.slot, Number(zone.dataset.maxdim), file);
-        else if (file) showToast('That file isn’t a photo, try a JPG or PNG.');
+        if (file) handleSiteMediaFile(zone, file);
       });
     });
   }
 
-  async function uploadSiteMediaSlot(slot, maxDim, file) {
+  function handleSiteMediaFile(zone, file) {
+    if (!file.type.startsWith('image/')) { showToast('That file isn’t a photo, try a JPG or PNG.'); return; }
+    const rect = zone.getBoundingClientRect();
+    openCropModal(file, zone.dataset.slot, Number(zone.dataset.maxdim), rect.width / rect.height);
+  }
+
+  // ---------------- Crop/reposition modal ----------------
+  // Lets a person frame the shot (pan + zoom) in the exact shape it'll be
+  // used in, on whichever device view is currently active, before it's
+  // uploaded. Same shared image serves both Desktop and Mobile on the real
+  // site (there's no per-device variant), so a crop made in one view is a
+  // reasonable frame for the other, not a pixel-identical one.
+
+  let cropState = null;
+  let cropDrag = null;
+
+  function openCropModal(file, slot, maxDim, aspect) {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const stage = $('crop-stage');
+      const stageW = Math.min(440, window.innerWidth - 72);
+      const stageH = stageW / aspect;
+      stage.style.width = stageW + 'px';
+      stage.style.height = stageH + 'px';
+
+      const minScale = Math.max(stageW / img.naturalWidth, stageH / img.naturalHeight);
+      cropState = {
+        slot, maxDim, aspect, url,
+        naturalW: img.naturalWidth, naturalH: img.naturalHeight,
+        stageW, stageH,
+        scale: minScale, minScale, maxScale: minScale * 4,
+        x: (stageW - img.naturalWidth * minScale) / 2,
+        y: (stageH - img.naturalHeight * minScale) / 2,
+      };
+      $('crop-img').src = url;
+      $('crop-zoom').value = 0;
+      renderCropTransform();
+      $('crop-modal-backdrop').classList.add('open');
+      $('crop-modal').classList.add('open');
+    };
+    img.src = url;
+  }
+
+  function closeCropModal() {
+    if (cropState) URL.revokeObjectURL(cropState.url);
+    cropState = null;
+    $('crop-modal-backdrop').classList.remove('open');
+    $('crop-modal').classList.remove('open');
+  }
+
+  function renderCropTransform() {
+    const s = cropState;
+    if (!s) return;
+    const w = s.naturalW * s.scale;
+    const h = s.naturalH * s.scale;
+    s.x = Math.min(0, Math.max(Math.min(0, s.stageW - w), s.x));
+    s.y = Math.min(0, Math.max(Math.min(0, s.stageH - h), s.y));
+    $('crop-img').style.transform = 'translate(' + s.x + 'px,' + s.y + 'px) scale(' + s.scale + ')';
+  }
+
+  $('crop-stage').addEventListener('pointerdown', (e) => {
+    if (!cropState) return;
+    cropDrag = { startX: e.clientX, startY: e.clientY, origX: cropState.x, origY: cropState.y };
+    $('crop-stage').setPointerCapture(e.pointerId);
+  });
+  $('crop-stage').addEventListener('pointermove', (e) => {
+    if (!cropDrag || !cropState) return;
+    cropState.x = cropDrag.origX + (e.clientX - cropDrag.startX);
+    cropState.y = cropDrag.origY + (e.clientY - cropDrag.startY);
+    renderCropTransform();
+  });
+  ['pointerup', 'pointercancel'].forEach((evt) => {
+    $('crop-stage').addEventListener(evt, () => { cropDrag = null; });
+  });
+
+  $('crop-zoom').addEventListener('input', () => {
+    if (!cropState) return;
+    const t = Number($('crop-zoom').value) / 100;
+    cropState.scale = cropState.minScale + t * (cropState.maxScale - cropState.minScale);
+    renderCropTransform();
+  });
+
+  $('crop-cancel-btn').addEventListener('click', closeCropModal);
+  $('crop-modal-backdrop').addEventListener('click', closeCropModal);
+
+  $('crop-save-btn').addEventListener('click', () => {
+    const s = cropState;
+    if (!s) return;
+    let outW, outH;
+    if (s.aspect >= 1) { outW = s.maxDim; outH = Math.round(s.maxDim / s.aspect); }
+    else { outH = s.maxDim; outW = Math.round(s.maxDim * s.aspect); }
+    const canvas = document.createElement('canvas');
+    canvas.width = outW; canvas.height = outH;
+    const outScale = outW / s.stageW;
+    canvas.getContext('2d').drawImage(
+      $('crop-img'),
+      s.x * outScale, s.y * outScale,
+      s.naturalW * s.scale * outScale, s.naturalH * s.scale * outScale
+    );
+    const slot = s.slot;
+    canvas.toBlob((blob) => {
+      if (!blob) { showToast('Could not process that image.'); return; }
+      finishSiteMediaUpload(slot, blob);
+      closeCropModal();
+    }, 'image/webp', 0.85);
+  });
+
+  async function finishSiteMediaUpload(slot, blob) {
     const zone = document.querySelector('.mockup-drop[data-slot="' + slot + '"]');
     if (zone) zone.classList.add('uploading');
     try {
-      const webp = await resizeToWebp(file, maxDim);
-      await api('/admin/site-media/' + slot, { method: 'POST', headers: { 'Content-Type': 'image/webp' }, body: webp });
+      await api('/admin/site-media/' + slot, { method: 'POST', headers: { 'Content-Type': 'image/webp' }, body: blob });
       showToast('Photo updated.');
       await loadSiteMedia();
     } catch (err) {
