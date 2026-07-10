@@ -59,6 +59,10 @@
   "env": {
     "staging": {
       "name": "coffee-tea-site-staging",
+      // Staging must NOT inherit the top-level custom domain routes, or
+      // deploying to staging reassigns coffee-tea.online away from
+      // production. Keep this explicitly empty.
+      "routes": [],
       "d1_databases": [
         {
           "binding": "DB",
