@@ -295,6 +295,30 @@
   .mockup-story-copy .mockup-eyebrow { color: var(--ink); opacity: 0.55; }
   .mockup-story-p { font-family: var(--font-display); font-size: 0.85rem; line-height: 1.5; margin: 0; opacity: 0.9; }
 
+  /* Non-editable context sections (Featured product, footer): shown purely
+     so the page can be visualized as a whole while managing photos above;
+     nothing here is a Site Media slot. */
+  .mockup-context { border-top: 1px solid var(--line); padding: 18px; }
+  .mockup-context-tag {
+    display: block; font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--ink); opacity: 0.45; margin-bottom: 12px;
+  }
+  .mockup-featured { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center; }
+  .site-mockup[data-view="mobile"] .mockup-featured { grid-template-columns: 1fr; }
+  .mockup-featured-media { aspect-ratio: 4 / 3; border-radius: 4px; overflow: hidden; background: var(--paper); }
+  .mockup-featured-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mockup-featured-copy h2 { font-family: var(--font-display); font-weight: 300; font-size: 1.1rem; margin: 6px 0; }
+  .mockup-featured-price { font-weight: 700; font-size: 0.9rem; }
+
+  .mockup-footer { display: flex; flex-direction: column; gap: 16px; }
+  .mockup-footer-newsletter strong { font-family: var(--font-display); font-weight: 400; font-size: 1rem; }
+  .mockup-footer-newsletter p { font-size: 0.78rem; opacity: 0.65; margin: 4px 0 0; }
+  .mockup-footer-cols { display: flex; gap: 28px; flex-wrap: wrap; }
+  .site-mockup[data-view="mobile"] .mockup-footer-cols { flex-direction: column; gap: 10px; }
+  .mockup-footer-cols h4 { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.55; margin: 0 0 6px; font-weight: 700; }
+  .mockup-footer-cols span { font-size: 0.78rem; opacity: 0.6; }
+  .mockup-footer-legal { font-size: 0.72rem; opacity: 0.4; border-top: 1px solid var(--line); padding-top: 12px; }
+
   /* ---------- Crop/reposition modal ---------- */
   .crop-modal-backdrop {
     display: none; position: fixed; inset: 0; background: rgba(20,16,12,0.6); z-index: 80;
@@ -897,6 +921,7 @@
 
   let activeHeroSlot = 'hero-1';
   let activeView = 'desktop';
+  let featuredProduct = null;
 
   // Real copy pulled straight from site/index.html so switching hero slides
   // previews the actual headline/tint/button that ships with each photo.
@@ -906,10 +931,25 @@
     'hero-3': { tint: 'rgba(29,27,23,0.55)', eyebrow: 'Small batch, always fresh', h1: 'Start with what everyone’s reaching for.', p: 'The lots and leaves that sell out first, restocked in small runs, not warehoused.', btn: 'Shop best sellers' },
   };
 
+  async function fetchFeaturedProduct() {
+    // Mirrors site/index.html's renderFeatured(): most-recently-created
+    // active product. Read-only context for the mockup below, not a slot.
+    try {
+      const res = await fetch('/api/products');
+      const data = await res.json();
+      const list = data.products || [];
+      if (list.length === 0) return null;
+      return list.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+    } catch {
+      return null;
+    }
+  }
+
   async function loadSiteMedia() {
     $('site-mockup-scroll').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Loading…</p>';
     try {
       await api('/admin/site-media');
+      featuredProduct = await fetchFeaturedProduct();
       renderSiteMockup();
     } catch (err) {
       $('site-mockup-scroll').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Failed to load: ' + err.message + '</p>';
@@ -969,6 +1009,35 @@
       '<div class="mockup-tile-tint" style="background:rgba(122,90,27,0.72)"></div>' +
       '<div class="mockup-tile-copy"><span class="mockup-tile-label">Tea</span><span class="mockup-tile-sub">Browse all tea</span></div>';
 
+    const fp = featuredProduct;
+    const featuredHtml = fp ? (
+      '<div class="mockup-context">' +
+        '<span class="mockup-context-tag">Not editable here, managed in the Products tab</span>' +
+        '<div class="mockup-featured">' +
+          '<div class="mockup-featured-media"><img src="' + (fp.image_key ? '/media/' + fp.image_key : '/media/marketing/product-placeholder.webp') + '" alt=""></div>' +
+          '<div class="mockup-featured-copy">' +
+            '<span class="mockup-eyebrow">Featured</span>' +
+            '<h2>' + escapeHtml(fp.name) + '</h2>' +
+            '<span class="mockup-featured-price">₱' + (fp.price_cents / 100).toFixed(2) + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    ) : '';
+
+    const footerHtml =
+      '<div class="mockup-context">' +
+        '<span class="mockup-context-tag">Not editable here</span>' +
+        '<div class="mockup-footer">' +
+          '<div class="mockup-footer-newsletter"><strong>Join the list</strong><p>Small-batch drops and brewing notes, no spam, unsubscribe anytime.</p></div>' +
+          '<div class="mockup-footer-cols">' +
+            '<div><h4>Company</h4><span>About &middot; Contact</span></div>' +
+            '<div><h4>Learn</h4><span>Brew Guides &middot; Our Sourcing</span></div>' +
+            '<div><h4>More</h4><span>FAQs</span></div>' +
+          '</div>' +
+          '<div class="mockup-footer-legal">Coffee &amp; Tea</div>' +
+        '</div>' +
+      '</div>';
+
     $('site-mockup-scroll').innerHTML =
       '<div class="mockup-utility">Free shipping on orders over $40</div>' +
       '<div class="mockup-topbar">' +
@@ -977,6 +1046,7 @@
         '<span class="mockup-cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h2l1.6 10.2A2 2 0 0 0 8.6 16h8.8a2 2 0 0 0 2-1.7L21 7H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg></span>' +
       '</div>' +
       mediaDropMarkup(activeHeroSlot, 1600, 'mockup-hero', heroInner) +
+      featuredHtml +
       '<div class="mockup-tiles">' +
         mediaDropMarkup('category-coffee', 800, 'mockup-tile', coffeeInner) +
         mediaDropMarkup('category-tea', 800, 'mockup-tile', teaInner) +
@@ -987,7 +1057,8 @@
           '<span class="mockup-eyebrow">Our approach</span>' +
           '<p class="mockup-story-p">We work directly with a small number of farms and gardens, paying for quality and traceability first; every bag and tin carries the origin, altitude, and process behind it, because we think that context is part of what you’re buying.</p>' +
         '</div>' +
-      '</div>';
+      '</div>' +
+      footerHtml;
 
     wireDropzones($('site-mockup-scroll'));
     $('site-mockup-scroll').querySelectorAll('.hero-dot-btn').forEach((btn) => {
