@@ -184,33 +184,54 @@
   .media-group-head h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 400; margin-bottom: 3px; }
   .media-group-head p { font-size: 0.82rem; opacity: 0.65; margin: 0; max-width: 60ch; }
 
-  .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
   .media-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
-  .media-thumb { position: relative; margin-bottom: 10px; }
-  .media-thumb img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 4px; background: var(--paper); display: block; }
-  .media-thumb .media-uploading-veil {
-    position: absolute; inset: 0; border-radius: 4px;
-    background: rgba(243,238,227,0.85);
-    display: none; align-items: center; justify-content: center;
-    font-size: 0.78rem; font-weight: 600;
+
+  /* Small reference preview of what's currently live, deliberately not the
+     main interactive element, so it can't be confused with the dropzone. */
+  .media-current { position: relative; margin-bottom: 8px; }
+  .media-current img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; background: var(--paper); display: block; opacity: 0.92; }
+  .media-current-tag {
+    position: absolute; top: 7px; left: 7px;
+    background: rgba(29,27,23,0.72); color: #fff;
+    font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 3px 7px; border-radius: 4px;
   }
-  .media-thumb.uploading .media-uploading-veil { display: flex; }
-  .media-upload-btn {
-    position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(29,27,23,0.85); color: #fff;
-    padding: 7px 14px; border-radius: 999px;
-    font-size: 0.78rem; font-weight: 600; cursor: pointer;
-    transition: background 0.15s ease, transform 0.15s ease;
-    white-space: nowrap;
+
+  /* The dropzone is the one obvious place to interact with. */
+  .media-dropzone {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    text-align: center;
+    border: 2px dashed rgba(29,27,23,0.25);
+    border-radius: 6px;
+    padding: 16px 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    color: var(--ink);
+    transition: border-color 0.15s ease, background 0.15s ease;
   }
-  .media-upload-btn:hover { background: var(--ink); transform: translateX(-50%) translateY(-1px); }
-  .media-upload-btn svg { flex-shrink: 0; }
-  .media-upload-btn input[type="file"] {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  .media-dropzone svg { opacity: 0.55; transition: opacity 0.15s ease; }
+  .media-dropzone:hover { border-color: rgba(29,27,23,0.45); background: rgba(29,27,23,0.025); }
+  .media-dropzone:hover svg { opacity: 0.8; }
+  .media-dropzone.drag-over { border-color: var(--coffee); background: rgba(44,74,110,0.07); border-style: solid; }
+  .media-dropzone .dz-text { font-size: 0.8rem; font-weight: 600; }
+  .media-dropzone .dz-subtext { font-size: 0.7rem; opacity: 0.55; }
+  .media-dropzone input[type="file"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+
+  .dz-text-mobile, .dz-uploading { display: none; }
+  @media (hover: none), (pointer: coarse) {
+    .dz-text-desktop { display: none; }
+    .dz-text-mobile { display: block; }
   }
+  .media-dropzone.uploading .dz-text-desktop,
+  .media-dropzone.uploading .dz-text-mobile,
+  .media-dropzone.uploading .dz-subtext { display: none; }
+  .media-dropzone.uploading .dz-uploading { display: block; }
+  .media-dropzone.uploading svg { animation: dz-pulse 1.1s ease-in-out infinite; }
+  @keyframes dz-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.9; } }
+
   .media-card .media-label { font-weight: 600; font-size: 0.88rem; margin-bottom: 3px; }
-  .media-card .media-hint { font-size: 0.76rem; opacity: 0.6; line-height: 1.4; margin-bottom: 4px; }
   .media-card .media-meta { font-size: 0.7rem; opacity: 0.45; font-family: var(--font-body); }
   .media-card .media-meta.is-updated { opacity: 1; color: var(--coffee); font-weight: 600; }
 
@@ -810,8 +831,8 @@
     }
   }
 
-  function cameraIcon() {
-    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="14" r="3.5"/></svg>';
+  function uploadCloudIcon() {
+    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 18a4.5 4.5 0 01-1-8.88 5.5 5.5 0 0110.55-2A4.5 4.5 0 0117.5 18H7z"/><path d="M12 12v7"/><path d="M9.5 14.5L12 12l2.5 2.5"/></svg>';
   }
 
   function renderSiteMediaGrid() {
@@ -833,32 +854,62 @@
         : 'Using the starting default photo';
       parts.push(
         '<div class="media-card" data-slot="' + s.slot + '">' +
-          '<div class="media-thumb">' +
+          '<div class="media-current">' +
             '<img src="/media/marketing/' + s.slot + '.webp?t=' + Date.now() + '" alt="">' +
-            '<div class="media-uploading-veil">Uploading…</div>' +
-            '<label class="media-upload-btn">' + cameraIcon() + ' Change photo' +
-              '<input type="file" accept="image/*" data-slot="' + s.slot + '" data-maxdim="' + s.maxDim + '" class="sitemedia-input">' +
-            '</label>' +
+            '<span class="media-current-tag">Currently live</span>' +
           '</div>' +
+          '<label class="media-dropzone" data-slot="' + s.slot + '">' +
+            uploadCloudIcon() +
+            '<span class="dz-text dz-text-desktop">Drag a photo here, or click to browse</span>' +
+            '<span class="dz-text dz-text-mobile">Tap to choose a photo</span>' +
+            '<span class="dz-text dz-uploading">Uploading…</span>' +
+            '<span class="dz-subtext">' + escapeHtml(copy.hint) + '</span>' +
+            '<input type="file" accept="image/*" data-slot="' + s.slot + '" data-maxdim="' + s.maxDim + '" class="sitemedia-input">' +
+          '</label>' +
           '<div class="media-label">' + escapeHtml(copy.title) + '</div>' +
-          '<div class="media-hint">' + escapeHtml(copy.hint) + '</div>' +
           '<div class="media-meta">' + escapeHtml(updatedText) + '</div>' +
         '</div>'
       );
     });
     if (lastGroup !== null) parts.push('</div></div>');
     $('sitemedia-grid').innerHTML = parts.join('');
+
     $('sitemedia-grid').querySelectorAll('.sitemedia-input').forEach((input) => {
       input.addEventListener('change', () => {
         if (input.files[0]) uploadSiteMediaSlot(input.dataset.slot, Number(input.dataset.maxdim), input.files[0]);
+      });
+    });
+
+    $('sitemedia-grid').querySelectorAll('.media-dropzone').forEach((zone) => {
+      const slot = zone.dataset.slot;
+      const maxDim = Number(zone.querySelector('.sitemedia-input').dataset.maxdim);
+      let dragDepth = 0;
+      zone.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        dragDepth++;
+        zone.classList.add('drag-over');
+      });
+      zone.addEventListener('dragover', (e) => e.preventDefault());
+      zone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dragDepth = Math.max(0, dragDepth - 1);
+        if (dragDepth === 0) zone.classList.remove('drag-over');
+      });
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragDepth = 0;
+        zone.classList.remove('drag-over');
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) uploadSiteMediaSlot(slot, maxDim, file);
+        else if (file) showToast('That file isn’t a photo, try a JPG or PNG.');
       });
     });
   }
 
   async function uploadSiteMediaSlot(slot, maxDim, file) {
     const card = $('sitemedia-grid').querySelector('.media-card[data-slot="' + slot + '"]');
-    const thumb = card ? card.querySelector('.media-thumb') : null;
-    if (thumb) thumb.classList.add('uploading');
+    const zone = card ? card.querySelector('.media-dropzone') : null;
+    if (zone) zone.classList.add('uploading');
     try {
       const webp = await resizeToWebp(file, maxDim);
       await api('/admin/site-media/' + slot, { method: 'POST', headers: { 'Content-Type': 'image/webp' }, body: webp });
@@ -866,7 +917,7 @@
       await loadSiteMedia();
       refreshLivePreviews();
     } catch (err) {
-      if (thumb) thumb.classList.remove('uploading');
+      if (zone) zone.classList.remove('uploading');
       showToast('Upload failed: ' + err.message);
     }
   }
