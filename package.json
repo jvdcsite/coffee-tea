@@ -7,7 +7,9 @@
     "deploy:staging": "wrangler deploy --env staging",
     "deploy:prod": "wrangler deploy",
     "db:init:local": "wrangler d1 execute coffee-tea-db --file=./db/schema.sql",
-    "db:init:remote": "wrangler d1 execute coffee-tea-db --file=./db/schema.sql --remote"
+    "db:init:remote": "wrangler d1 execute coffee-tea-db --file=./db/schema.sql --remote",
+    "db:migrate:orders:local": "wrangler d1 execute coffee-tea-db --file=./db/migrations/002_orders.sql",
+    "db:migrate:orders:remote": "wrangler d1 execute coffee-tea-db --file=./db/migrations/002_orders.sql --remote"
   },
   "devDependencies": {
     "sharp": "^0.35.3",

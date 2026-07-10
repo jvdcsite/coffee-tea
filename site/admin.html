@@ -342,6 +342,25 @@
   .crop-zoom-row input[type="range"] { flex: 1; }
   .crop-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 
+  /* ---------- Generic modal (order detail) ---------- */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(20,16,12,0.6); z-index: 80;
+  }
+  .modal-backdrop.open { display: block; }
+  .modal-box {
+    display: none; position: fixed; z-index: 81; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px;
+    padding: 24px; width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 40px); overflow-y: auto;
+  }
+  .modal-box.open { display: block; }
+  .modal-box h3 { font-size: 1.1rem; margin: 0 0 4px; }
+  .modal-close-x { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.6; }
+  .modal-close-x:hover { opacity: 1; }
+  .order-line-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 0.85rem; }
+  .order-detail-row { display: flex; justify-content: space-between; font-size: 0.82rem; padding: 4px 0; opacity: 0.85; }
+  .variant-row { display: grid; grid-template-columns: 1.4fr 1fr 0.8fr 0.8fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .variant-row input, .variant-row select { padding: 6px 8px; font-size: 0.82rem; }
+
   .toast {
     position: fixed; bottom: 20px; right: 20px;
     background: var(--ink); color: var(--paper);
@@ -393,6 +412,10 @@
         <button class="nav-item" data-panel="orders">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
           Orders
+        </button>
+        <button class="nav-item" data-panel="discounts">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.59 13.41L12 21.99 2 12l.01-8.99H11l9.59 9.59a2 2 0 010 2.82z"/><circle cx="6.5" cy="6.5" r="1.5"/></svg>
+          Discounts
         </button>
         <button class="nav-item" data-panel="newsletter">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>
@@ -486,6 +509,17 @@
           <div class="calc-result" id="calc-result">Enter a cost and a price to see margin.</div>
         </div>
 
+        <!-- ---- Variants (size/grind). Only meaningful once the product has
+             an id, so this is hidden for a brand-new unsaved product. ---- -->
+        <div class="calc-box" id="variants-box" hidden style="margin-top:16px">
+          <strong style="font-size:0.85rem">Variants (size / grind)</strong>
+          <p style="font-size:0.78rem;opacity:0.65;margin:4px 0 12px">
+            Optional. If a product has no variants it sells as a single line at the price above.
+          </p>
+          <div id="variants-list"></div>
+          <button class="btn secondary" id="add-variant-btn" style="margin-top:8px">+ Add variant</button>
+        </div>
+
         <!-- ---- Image upload (client resizes/converts before this point) ---- -->
         <div class="field" style="margin-top:16px">
           <label>Product image (will be resized + converted to WebP in your browser before upload)</label>
@@ -528,28 +562,69 @@
       </div>
     </section>
 
-    <!-- ---- Orders ----
-         Placeholder tab only, no backend yet. Needs: an orders table
-         (line items, customer, shipping, payment status), and a real
-         checkout/payment integration (Stripe per the project brief) before
-         this can show real data. Layout below is a rough sketch to build
-         against later, not functional. -->
+    <!-- ---- Orders ---- -->
     <section class="panel-section" id="panel-orders">
       <div class="row-between">
         <h2>Orders</h2>
-        <span class="badge">Coming soon</span>
+        <div style="display:flex;gap:10px;align-items:center">
+          <select id="orders-status-filter" style="padding:6px 10px;font-size:0.82rem">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="fulfilled">Fulfilled</option>
+            <option value="shipped">Shipped</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="refunded">Refunded</option>
+          </select>
+          <button class="btn secondary" id="orders-refresh-btn">Refresh</button>
+        </div>
       </div>
-      <p style="opacity:0.7;font-size:0.88rem;max-width:70ch;margin-top:-6px">
-        Order management isn't built yet, checkout isn't wired up on the public
-        site (see AGENT_HANDOFF.md). This is a placeholder layout for when it is.
-      </p>
       <div class="table-scroll">
         <table>
           <thead>
-            <tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr>
+            <tr><th>Order</th><th>Email</th><th>Total</th><th>Status</th><th>Date</th></tr>
           </thead>
-          <tbody>
-            <tr><td colspan="6" style="text-align:center;opacity:0.5;padding:32px">No orders yet. This tab will populate once checkout is live.</td></tr>
+          <tbody id="orders-tbody">
+            <tr><td colspan="5">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---- Discounts ---- -->
+    <section class="panel-section" id="panel-discounts">
+      <div class="row-between">
+        <h2>Discounts</h2>
+        <button class="btn" id="new-discount-btn">+ New code</button>
+      </div>
+
+      <div class="card-box" id="discount-form-box" style="margin-bottom:20px" hidden>
+        <div class="grid-2">
+          <div class="field"><label>Code</label><input id="d-code" placeholder="WELCOME10" style="text-transform:uppercase"></div>
+          <div class="field"><label>Type</label>
+            <select id="d-kind"><option value="percent">Percent off</option><option value="fixed">Fixed amount off (₱)</option></select>
+          </div>
+          <div class="field"><label id="d-value-label">Percent (0-100)</label><input id="d-value" type="number"></div>
+          <div class="field"><label>Minimum subtotal (₱, optional)</label><input id="d-min-subtotal" type="number"></div>
+          <div class="field"><label>Max uses (optional)</label><input id="d-max-uses" type="number"></div>
+          <div class="field"><label>Expires (optional)</label><input id="d-expires" type="date"></div>
+          <div class="field"><label>Active</label>
+            <select id="d-active"><option value="1">Yes</option><option value="0">No</option></select>
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px">
+          <button class="btn" id="save-discount-btn">Save code</button>
+          <button class="btn secondary" id="cancel-discount-btn">Cancel</button>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Code</th><th>Type</th><th>Value</th><th>Uses</th><th>Active</th><th></th></tr>
+          </thead>
+          <tbody id="discounts-tbody">
+            <tr><td colspan="6">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -615,6 +690,31 @@
     <button class="btn secondary" id="crop-cancel-btn">Cancel</button>
     <button class="btn" id="crop-save-btn">Save photo</button>
   </div>
+</div>
+
+<!-- ================= Order detail modal ================= -->
+<div class="modal-backdrop" id="order-modal-backdrop"></div>
+<div class="modal-box" id="order-modal" role="dialog" aria-modal="true" aria-label="Order detail">
+  <button class="modal-close-x" id="order-modal-close" aria-label="Close">&times;</button>
+  <h3>Order <span id="order-modal-id"></span></h3>
+  <p style="font-size:0.82rem;opacity:0.65;margin:0 0 16px" id="order-modal-email"></p>
+  <div id="order-modal-items"></div>
+  <div style="margin-top:12px" id="order-modal-totals"></div>
+  <div class="grid-2" style="margin-top:20px">
+    <div class="field"><label>Status</label>
+      <select id="order-modal-status">
+        <option value="pending">Pending</option>
+        <option value="paid">Paid</option>
+        <option value="fulfilled">Fulfilled</option>
+        <option value="shipped">Shipped</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="refunded">Refunded</option>
+      </select>
+    </div>
+    <div class="field"><label>Tracking number</label><input id="order-modal-tracking"></div>
+  </div>
+  <div class="field"><label>Notes</label><textarea id="order-modal-notes" rows="2"></textarea></div>
+  <div style="margin-top:16px"><button class="btn" id="order-modal-save-btn">Save changes</button></div>
 </div>
 
 <script>
@@ -694,17 +794,19 @@
     btn.addEventListener('click', () => switchPanel(btn.dataset.panel));
   });
 
-  const panelTitles = { list: 'Products', form: 'Product', sitemedia: 'Site Media', orders: 'Orders', newsletter: 'Newsletter' };
+  const panelTitles = { list: 'Products', form: 'Product', sitemedia: 'Site Media', orders: 'Orders', discounts: 'Discounts', newsletter: 'Newsletter' };
 
   function switchPanel(name) {
     document.querySelectorAll('.sidebar-nav button[data-panel]').forEach((b) => b.classList.toggle('active', b.dataset.panel === name));
     document.querySelectorAll('.panel-section').forEach((s) => s.classList.remove('visible'));
-    const map = { list: 'panel-list', form: 'panel-form', sitemedia: 'panel-sitemedia', orders: 'panel-orders', newsletter: 'panel-newsletter' };
+    const map = { list: 'panel-list', form: 'panel-form', sitemedia: 'panel-sitemedia', orders: 'panel-orders', discounts: 'panel-discounts', newsletter: 'panel-newsletter' };
     $(map[name]).classList.add('visible');
     $('topbar-title').textContent = panelTitles[name] || '';
     closeSidebar();
     if (name === 'newsletter') loadNewsletterSubscribers();
     if (name === 'sitemedia') loadSiteMedia();
+    if (name === 'orders') loadOrders();
+    if (name === 'discounts') loadDiscounts();
   }
 
   // ---------------- Mobile drawer ----------------
@@ -794,6 +896,10 @@
     $('calc-price').value = p ? (p.price_cents / 100).toFixed(2) : '';
     updateCalc();
 
+    $('variants-box').hidden = !p;
+    if (p) loadVariants(p.id);
+    else $('variants-list').innerHTML = '';
+
     toggleCategoryFields();
     switchPanel('form');
   }
@@ -843,6 +949,72 @@
     } catch (err) {
       showToast('Error: ' + err.message);
     }
+  });
+
+  // ---------------- Variants (size/grind) ----------------
+
+  let variants = [];
+
+  async function loadVariants(productId) {
+    const res = await api('/admin/products/' + productId + '/variants');
+    const data = await res.json();
+    variants = data.variants || [];
+    renderVariants();
+  }
+
+  function renderVariants() {
+    $('variants-list').innerHTML = variants.map((v, i) => (
+      '<div class="variant-row" data-idx="' + i + '">' +
+        '<input placeholder="Label, e.g. 250g / Whole bean" value="' + escapeHtml(v.label || '') + '" data-vfield="label">' +
+        '<select data-vfield="grind">' +
+          ['', 'whole', 'espresso', 'filter', 'french-press'].map((g) => (
+            '<option value="' + g + '"' + (v.grind === g ? ' selected' : '') + '>' + (g || 'No grind') + '</option>'
+          )).join('') +
+        '</select>' +
+        '<input type="number" placeholder="Price ₱" value="' + (v.price_cents != null ? (v.price_cents / 100).toFixed(2) : '') + '" data-vfield="price">' +
+        '<input type="number" placeholder="Stock" value="' + (v.stock_count ?? 0) + '" data-vfield="stock">' +
+        '<button class="btn secondary" data-vsave="' + i + '" style="padding:6px 10px;font-size:0.78rem">Save</button>' +
+      '</div>' +
+      (v.id ? '<button class="btn danger" data-vdelete="' + v.id + '" style="padding:4px 10px;font-size:0.72rem;margin:-4px 0 12px">Delete</button>' : '')
+    )).join('');
+
+    $('variants-list').querySelectorAll('[data-vsave]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const idx = Number(btn.dataset.vsave);
+        const row = $('variants-list').querySelectorAll('.variant-row')[idx];
+        const label = row.querySelector('[data-vfield="label"]').value.trim();
+        const grind = row.querySelector('[data-vfield="grind"]').value || null;
+        const price_cents = Math.round(Number(row.querySelector('[data-vfield="price"]').value || 0) * 100);
+        const stock_count = Number(row.querySelector('[data-vfield="stock"]').value || 0);
+        if (!label || !price_cents) { showToast('Variant needs a label and a price.'); return; }
+        const v = variants[idx];
+        try {
+          if (v.id) {
+            await api('/admin/variants/' + v.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ label, grind, price_cents, stock_count }) });
+          } else {
+            await api('/admin/products/' + editingId + '/variants', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ label, grind, price_cents, stock_count }) });
+          }
+          showToast('Variant saved.');
+          await loadVariants(editingId);
+        } catch (err) {
+          showToast('Error: ' + err.message);
+        }
+      });
+    });
+
+    $('variants-list').querySelectorAll('[data-vdelete]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this variant?')) return;
+        await api('/admin/variants/' + btn.dataset.vdelete, { method: 'DELETE' });
+        showToast('Variant deleted.');
+        await loadVariants(editingId);
+      });
+    });
+  }
+
+  $('add-variant-btn').addEventListener('click', () => {
+    variants.push({ label: '', grind: null, price_cents: null, stock_count: 0 });
+    renderVariants();
   });
 
   $('delete-product-btn').addEventListener('click', async () => {
@@ -1235,6 +1407,200 @@
   });
 
   $('sitemedia-refresh-btn').addEventListener('click', loadSiteMedia);
+
+  // ---------------- Orders ----------------
+
+  let orders = [];
+  let openOrderId = null;
+
+  async function loadOrders() {
+    $('orders-tbody').innerHTML = '<tr><td colspan="5">Loading…</td></tr>';
+    try {
+      const status = $('orders-status-filter').value;
+      const res = await api('/admin/orders' + (status ? '?status=' + status : ''));
+      const data = await res.json();
+      orders = data.orders || [];
+      renderOrdersTable();
+    } catch (err) {
+      $('orders-tbody').innerHTML = '<tr><td colspan="5">Failed to load: ' + err.message + '</td></tr>';
+    }
+  }
+
+  function renderOrdersTable() {
+    if (orders.length === 0) {
+      $('orders-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;opacity:0.5;padding:32px">No orders yet.</td></tr>';
+      return;
+    }
+    $('orders-tbody').innerHTML = orders.map((o) => (
+      '<tr class="clickable" data-order="' + o.id + '">' +
+        '<td>' + escapeHtml(o.id.slice(0, 8)) + '</td>' +
+        '<td>' + escapeHtml(o.email) + '</td>' +
+        '<td>₱' + (o.total_cents / 100).toFixed(2) + '</td>' +
+        '<td><span class="badge">' + escapeHtml(o.status) + '</span></td>' +
+        '<td>' + escapeHtml((o.created_at || '').slice(0, 16)) + '</td>' +
+      '</tr>'
+    )).join('');
+    $('orders-tbody').querySelectorAll('[data-order]').forEach((row) => {
+      row.addEventListener('click', () => openOrderModal(row.dataset.order));
+    });
+  }
+
+  async function openOrderModal(id) {
+    openOrderId = id;
+    const res = await api('/admin/orders/' + id);
+    const data = await res.json();
+    const order = data.order;
+    const items = data.items || [];
+
+    $('order-modal-id').textContent = order.id;
+    $('order-modal-email').textContent = order.email;
+    $('order-modal-items').innerHTML = items.map((i) => (
+      '<div class="order-line-item"><span>' + i.quantity + ' &times; ' + escapeHtml(i.name_snapshot) + '</span><span>₱' + (i.line_cents / 100).toFixed(2) + '</span></div>'
+    )).join('');
+    $('order-modal-totals').innerHTML =
+      '<div class="order-detail-row"><span>Subtotal</span><span>₱' + (order.subtotal_cents / 100).toFixed(2) + '</span></div>' +
+      (order.discount_cents ? '<div class="order-detail-row"><span>Discount</span><span>&minus;₱' + (order.discount_cents / 100).toFixed(2) + '</span></div>' : '') +
+      '<div class="order-detail-row"><span>Shipping</span><span>₱' + (order.shipping_cents / 100).toFixed(2) + '</span></div>' +
+      '<div class="order-detail-row"><span>Tax</span><span>₱' + (order.tax_cents / 100).toFixed(2) + '</span></div>' +
+      '<div class="order-detail-row" style="font-weight:600"><span>Total</span><span>₱' + (order.total_cents / 100).toFixed(2) + '</span></div>';
+    $('order-modal-status').value = order.status;
+    $('order-modal-tracking').value = order.tracking_number || '';
+    $('order-modal-notes').value = order.notes || '';
+
+    $('order-modal-backdrop').classList.add('open');
+    $('order-modal').classList.add('open');
+  }
+
+  function closeOrderModal() {
+    $('order-modal-backdrop').classList.remove('open');
+    $('order-modal').classList.remove('open');
+    openOrderId = null;
+  }
+
+  $('order-modal-close').addEventListener('click', closeOrderModal);
+  $('order-modal-backdrop').addEventListener('click', closeOrderModal);
+  $('orders-refresh-btn').addEventListener('click', loadOrders);
+  $('orders-status-filter').addEventListener('change', loadOrders);
+
+  $('order-modal-save-btn').addEventListener('click', async () => {
+    if (!openOrderId) return;
+    try {
+      await api('/admin/orders/' + openOrderId, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: $('order-modal-status').value,
+          tracking_number: $('order-modal-tracking').value.trim() || null,
+          notes: $('order-modal-notes').value.trim() || null,
+        }),
+      });
+      showToast('Order updated.');
+      closeOrderModal();
+      await loadOrders();
+    } catch (err) {
+      showToast('Error: ' + err.message);
+    }
+  });
+
+  // ---------------- Discounts ----------------
+
+  let discounts = [];
+  let editingDiscountCode = null;
+
+  async function loadDiscounts() {
+    $('discounts-tbody').innerHTML = '<tr><td colspan="6">Loading…</td></tr>';
+    try {
+      const res = await api('/admin/discounts');
+      const data = await res.json();
+      discounts = data.discounts || [];
+      renderDiscountsTable();
+    } catch (err) {
+      $('discounts-tbody').innerHTML = '<tr><td colspan="6">Failed to load: ' + err.message + '</td></tr>';
+    }
+  }
+
+  function renderDiscountsTable() {
+    if (discounts.length === 0) {
+      $('discounts-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;opacity:0.5;padding:32px">No discount codes yet.</td></tr>';
+      return;
+    }
+    $('discounts-tbody').innerHTML = discounts.map((d) => (
+      '<tr>' +
+        '<td>' + escapeHtml(d.code) + '</td>' +
+        '<td>' + (d.kind === 'percent' ? 'Percent' : 'Fixed') + '</td>' +
+        '<td>' + (d.kind === 'percent' ? d.value + '%' : '₱' + (d.value / 100).toFixed(2)) + '</td>' +
+        '<td>' + d.used_count + (d.max_uses ? ' / ' + d.max_uses : '') + '</td>' +
+        '<td>' + (d.active ? 'Yes' : 'No') + '</td>' +
+        '<td style="display:flex;gap:8px">' +
+          '<button class="btn secondary" data-dedit="' + escapeHtml(d.code) + '" style="padding:4px 10px;font-size:0.78rem">Edit</button>' +
+          '<button class="btn danger" data-ddelete="' + escapeHtml(d.code) + '" style="padding:4px 10px;font-size:0.78rem">Delete</button>' +
+        '</td>' +
+      '</tr>'
+    )).join('');
+
+    $('discounts-tbody').querySelectorAll('[data-dedit]').forEach((btn) => {
+      btn.addEventListener('click', () => openDiscountForm(btn.dataset.dedit));
+    });
+    $('discounts-tbody').querySelectorAll('[data-ddelete]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete code ' + btn.dataset.ddelete + '?')) return;
+        await api('/admin/discounts/' + encodeURIComponent(btn.dataset.ddelete), { method: 'DELETE' });
+        showToast('Deleted.');
+        await loadDiscounts();
+      });
+    });
+  }
+
+  function openDiscountForm(code) {
+    const d = code ? discounts.find((x) => x.code === code) : null;
+    editingDiscountCode = code || null;
+    $('d-code').value = d?.code || '';
+    $('d-code').disabled = !!d; // code is the primary key, don't allow renaming in place
+    $('d-kind').value = d?.kind || 'percent';
+    $('d-value').value = d?.value ?? '';
+    $('d-min-subtotal').value = d?.min_subtotal_cents ? (d.min_subtotal_cents / 100) : '';
+    $('d-max-uses').value = d?.max_uses ?? '';
+    $('d-expires').value = d?.expires_at ? d.expires_at.slice(0, 10) : '';
+    $('d-active').value = String(d?.active ?? 1);
+    updateDiscountValueLabel();
+    $('discount-form-box').hidden = false;
+  }
+
+  function updateDiscountValueLabel() {
+    $('d-value-label').textContent = $('d-kind').value === 'percent' ? 'Percent (0-100)' : 'Amount off (₱)';
+  }
+  $('d-kind').addEventListener('change', updateDiscountValueLabel);
+
+  $('new-discount-btn').addEventListener('click', () => openDiscountForm(null));
+  $('cancel-discount-btn').addEventListener('click', () => { $('discount-form-box').hidden = true; });
+
+  $('save-discount-btn').addEventListener('click', async () => {
+    const code = $('d-code').value.trim().toUpperCase();
+    const kind = $('d-kind').value;
+    const value = kind === 'percent' ? Number($('d-value').value || 0) : Math.round(Number($('d-value').value || 0) * 100);
+    if (!code || !value) { showToast('Code and value are required.'); return; }
+    const payload = {
+      code,
+      kind,
+      value,
+      min_subtotal_cents: $('d-min-subtotal').value ? Math.round(Number($('d-min-subtotal').value) * 100) : 0,
+      max_uses: $('d-max-uses').value ? Number($('d-max-uses').value) : null,
+      expires_at: $('d-expires').value || null,
+      active: Number($('d-active').value),
+    };
+    try {
+      if (editingDiscountCode) {
+        await api('/admin/discounts/' + encodeURIComponent(editingDiscountCode), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      } else {
+        await api('/admin/discounts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      }
+      showToast('Saved.');
+      $('discount-form-box').hidden = true;
+      await loadDiscounts();
+    } catch (err) {
+      showToast('Error: ' + err.message);
+    }
+  });
 
   // ---------------- Newsletter ----------------
 

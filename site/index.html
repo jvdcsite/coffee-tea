@@ -530,6 +530,35 @@
   .product-buy .price { font-size: 1.3rem; }
   @media (max-width: 860px) { .product-view-grid { grid-template-columns: 1fr; } .product-media { height: 300px; } }
 
+  /* ---------- Variant picker (size/grind), product detail ---------- */
+  .variant-picker { margin: 0 0 20px; }
+  .variant-picker-label { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.55; margin-bottom: 8px; }
+  .variant-options { display: flex; flex-wrap: wrap; gap: 8px; }
+  .variant-option {
+    padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--paper-raised); font-family: var(--font-body); font-size: 0.85rem;
+    cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  }
+  .variant-option:hover { border-color: var(--ink); }
+  .variant-option.selected { border-color: var(--coffee); background: var(--coffee); color: #fff; }
+  .variant-option:disabled { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
+  .variant-option.selected:disabled { background: var(--line); color: var(--ink); }
+
+  /* ---------- Checkout: email capture + summary lines in the cart drawer ---------- */
+  .cart-checkout-email { width: 100%; padding: 10px 12px; margin-bottom: 10px; border: 1px solid var(--line); border-radius: 4px; font-family: var(--font-body); font-size: 0.9rem; }
+  .cart-summary-line { display: flex; justify-content: space-between; font-size: 0.85rem; opacity: 0.75; padding: 2px 0; }
+  .cart-checkout-msg { font-size: 0.82rem; margin: 8px 0 0; }
+  .cart-checkout-msg.error { color: #a4342a; }
+  .cart-checkout-msg.info { opacity: 0.7; }
+
+  /* ---------- Order confirmation / thank-you view ---------- */
+  .order-view { padding: 64px 0 90px; max-width: 640px; margin: 0 auto; }
+  .order-view h1 { font-family: var(--font-display); font-weight: 300; font-size: clamp(1.6rem, 3vw, 2.1rem); margin: 0 0 8px; }
+  .order-view .order-id { opacity: 0.6; font-size: 0.85rem; margin-bottom: 28px; }
+  .order-line { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
+  .order-totals .order-line:last-child { border-bottom: none; font-weight: 600; font-size: 1.05rem; padding-top: 14px; }
+  .order-status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; background: var(--paper-raised); border: 1px solid var(--line); font-size: 0.78rem; font-weight: 600; text-transform: capitalize; margin-bottom: 24px; }
+
   /* ---------- Footer ---------- */
   .site-footer { border-top: 1px solid var(--line); background: var(--paper-raised); }
   .newsletter-band {
@@ -839,6 +868,7 @@
         <div class="data-strip" id="product-data-strip"></div>
         <p class="product-description" id="product-description"></p>
         <p class="notes" id="product-notes"></p>
+        <div class="variant-picker" id="product-variants" hidden></div>
         <div class="product-buy">
           <span class="price" id="product-price"></span>
           <span class="stock" id="product-stock"></span>
@@ -846,6 +876,13 @@
         <button class="btn-primary" id="product-add-cart">Add to cart</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ================= ORDER CONFIRMATION (thank-you) ================= -->
+<div id="order-view" class="order-view" hidden>
+  <div class="wrap">
+    <div id="order-view-body">Loading your order&hellip;</div>
   </div>
 </div>
 
@@ -936,7 +973,9 @@
   </div>
   <div class="cart-footer">
     <div class="cart-subtotal"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
-    <button class="btn-primary full" id="cart-checkout-btn" disabled title="Checkout isn't in scope yet">Checkout (coming soon)</button>
+    <input type="email" class="cart-checkout-email" id="cart-checkout-email" placeholder="you@example.com (for your receipt)" autocomplete="email">
+    <button class="btn-primary full" id="cart-checkout-btn">Checkout</button>
+    <p class="cart-checkout-msg" id="cart-checkout-msg" hidden></p>
   </div>
 </aside>
 
@@ -1232,7 +1271,10 @@
 
   // ---------------- Product detail (hash-routed) ----------------
 
-  function showProductView(id) {
+  let currentProductVariants = [];
+  let selectedVariantId = null;
+
+  async function showProductView(id) {
     const p = allProducts.find((x) => x.id === id);
     const homeView = $('home-view');
     const productView = $('product-view');
@@ -1250,12 +1292,12 @@
     $('product-data-strip').innerHTML = dataStripHtml(p);
     $('product-description').textContent = p.description || '';
     $('product-notes').innerHTML = p.flavor_notes ? '<b>Tasting notes:</b> ' + escapeHtml(p.flavor_notes) : '';
-    $('product-price').textContent = formatPrice(p.price_cents, p.currency);
-    $('product-stock').textContent = p.stock_count > 0 ? p.stock_count + ' left' : 'Sold out';
-    const addBtn = $('product-add-cart');
-    addBtn.disabled = p.stock_count <= 0;
-    addBtn.textContent = p.stock_count > 0 ? 'Add to cart' : 'Sold out';
-    addBtn.onclick = () => addToCart(p.id);
+
+    currentProductVariants = [];
+    selectedVariantId = null;
+    $('product-variants').hidden = true;
+    $('product-variants').innerHTML = '';
+    updateProductBuyState(p, null);
 
     homeView.hidden = true;
     productView.hidden = false;
@@ -1263,47 +1305,120 @@
     // the page's CSS `scroll-behavior: smooth` and left mid-animation.
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
+
+    try {
+      const resp = await fetch('/api/products/' + id + '/variants');
+      if (resp.ok) {
+        const data = await resp.json();
+        currentProductVariants = data.variants || [];
+        if (currentProductVariants.length) renderVariantPicker(p);
+      }
+    } catch (e) {
+      // No variants available; product still sells fine as a single line.
+    }
+  }
+
+  function renderVariantPicker(p) {
+    const wrap = $('product-variants');
+    const inStock = currentProductVariants.find((v) => v.stock_count > 0);
+    selectedVariantId = (inStock || currentProductVariants[0]).id;
+
+    wrap.innerHTML =
+      '<span class="variant-picker-label">Choose an option</span>' +
+      '<div class="variant-options">' +
+      currentProductVariants.map((v) => (
+        '<button type="button" class="variant-option' + (v.id === selectedVariantId ? ' selected' : '') + '" data-variant="' + v.id + '"' +
+        (v.stock_count <= 0 ? ' disabled' : '') + '>' + escapeHtml(v.label) + (v.stock_count <= 0 ? ' (sold out)' : '') + '</button>'
+      )).join('') +
+      '</div>';
+    wrap.hidden = false;
+
+    wrap.querySelectorAll('[data-variant]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        selectedVariantId = btn.dataset.variant;
+        wrap.querySelectorAll('.variant-option').forEach((b) => b.classList.toggle('selected', b.dataset.variant === selectedVariantId));
+        updateProductBuyState(p, currentProductVariants.find((v) => v.id === selectedVariantId));
+      });
+    });
+
+    updateProductBuyState(p, currentProductVariants.find((v) => v.id === selectedVariantId));
+  }
+
+  function updateProductBuyState(p, variant) {
+    const priceCents = variant ? variant.price_cents : p.price_cents;
+    const stock = variant ? variant.stock_count : p.stock_count;
+    $('product-price').textContent = formatPrice(priceCents, p.currency);
+    $('product-stock').textContent = stock > 0 ? stock + ' left' : 'Sold out';
+    const addBtn = $('product-add-cart');
+    addBtn.disabled = stock <= 0;
+    addBtn.textContent = stock > 0 ? 'Add to cart' : 'Sold out';
+    addBtn.onclick = () => addToCart(p.id, variant ? variant.id : null, variant ? variant.label : null, priceCents);
   }
 
   function showHomeView() {
     $('product-view').hidden = true;
+    $('order-view').hidden = true;
     $('home-view').hidden = false;
   }
 
   function handleRoute() {
-    const match = location.hash.match(/^#\/product\/([\w-]+)$/);
-    if (match) showProductView(match[1]);
-    else showHomeView();
+    const productMatch = location.hash.match(/^#\/product\/([\w-]+)$/);
+    if (productMatch) { showProductView(productMatch[1]); return; }
+    const orderMatch = location.hash.match(/^#\/order\/([\w-]+)/);
+    if (orderMatch) { showOrderView(orderMatch[1]); return; }
+    showHomeView();
   }
   window.addEventListener('hashchange', handleRoute);
 
-  // ---------------- Cart (UI-only stub, no checkout/payment logic) ----------------
+  // ---------------- Cart: server-validated at checkout (see doCheckout) ----------------
+  // Cart lines are keyed by product id + variant id together, so two sizes
+  // of the same product sit in the cart as separate lines. Prices shown here
+  // are for display only; /api/checkout/session re-derives every price and
+  // stock check from D1 before Stripe is ever involved.
+
+  function lineKeyFor(id, variantId) {
+    return variantId ? id + '::' + variantId : id;
+  }
 
   function saveCart() {
     try { sessionStorage.setItem('cart', JSON.stringify(cart)); } catch (e) {}
     renderCart();
   }
 
-  function addToCart(id) {
+  function addToCart(id, variantId, variantLabel, unitPriceCents) {
     const p = allProducts.find((x) => x.id === id);
-    if (!p || p.stock_count <= 0) return;
-    const line = cart.find((c) => c.id === id);
-    if (line) line.qty += 1;
-    else cart.push({ id: p.id, name: p.name, category: p.category, thumb_key: p.thumb_key, price_cents: p.price_cents, currency: p.currency, qty: 1 });
+    if (!p) return;
+    const key = lineKeyFor(id, variantId || null);
+    const line = cart.find((c) => lineKeyFor(c.id, c.variant_id) === key);
+    if (line) {
+      line.qty += 1;
+    } else {
+      cart.push({
+        id: p.id,
+        variant_id: variantId || null,
+        name: variantLabel ? p.name + ' — ' + variantLabel : p.name,
+        category: p.category,
+        thumb_key: p.thumb_key,
+        price_cents: unitPriceCents != null ? unitPriceCents : p.price_cents,
+        currency: p.currency,
+        qty: 1,
+      });
+    }
     saveCart();
     openCart();
   }
 
-  function changeQty(id, delta) {
-    const line = cart.find((c) => c.id === id);
+  function changeQty(key, delta) {
+    const line = cart.find((c) => lineKeyFor(c.id, c.variant_id) === key);
     if (!line) return;
     line.qty += delta;
-    if (line.qty <= 0) cart = cart.filter((c) => c.id !== id);
+    if (line.qty <= 0) cart = cart.filter((c) => lineKeyFor(c.id, c.variant_id) !== key);
     saveCart();
   }
 
-  function removeFromCart(id) {
-    cart = cart.filter((c) => c.id !== id);
+  function removeFromCart(key) {
+    cart = cart.filter((c) => lineKeyFor(c.id, c.variant_id) !== key);
     saveCart();
   }
 
@@ -1320,7 +1435,9 @@
       return;
     }
 
-    container.innerHTML = cart.map((c) => (
+    container.innerHTML = cart.map((c) => {
+      const key = lineKeyFor(c.id, c.variant_id);
+      return (
       '<div class="cart-line">' +
         '<img class="swatch-mini" src="' + (c.thumb_key ? '/media/' + c.thumb_key : '/media/marketing/product-placeholder.webp') + '" alt="">' +
         '<div class="cart-line-info">' +
@@ -1330,15 +1447,16 @@
           '</div>' +
           '<div class="cart-line-bottom">' +
             '<div class="qty-row">' +
-              '<button class="qty-btn" data-qty-minus="' + c.id + '" aria-label="Decrease quantity">&minus;</button>' +
+              '<button class="qty-btn" data-qty-minus="' + key + '" aria-label="Decrease quantity">&minus;</button>' +
               '<span class="qty-value">' + c.qty + '</span>' +
-              '<button class="qty-btn" data-qty-plus="' + c.id + '" aria-label="Increase quantity">+</button>' +
+              '<button class="qty-btn" data-qty-plus="' + key + '" aria-label="Increase quantity">+</button>' +
             '</div>' +
-            '<button class="cart-line-remove" data-remove="' + c.id + '">Remove</button>' +
+            '<button class="cart-line-remove" data-remove="' + key + '">Remove</button>' +
           '</div>' +
         '</div>' +
       '</div>'
-    )).join('');
+      );
+    }).join('');
 
     container.querySelectorAll('[data-qty-plus]').forEach((b) => b.addEventListener('click', () => changeQty(b.dataset.qtyPlus, 1)));
     container.querySelectorAll('[data-qty-minus]').forEach((b) => b.addEventListener('click', () => changeQty(b.dataset.qtyMinus, -1)));
@@ -1347,6 +1465,116 @@
     const subtotal = cart.reduce((sum, c) => sum + c.price_cents * c.qty, 0);
     const currency = cart[0] ? cart[0].currency : 'USD';
     $('cart-subtotal').textContent = formatPrice(subtotal, currency);
+  }
+
+  const CHECKOUT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function setCheckoutMsg(text, kind) {
+    const msgEl = $('cart-checkout-msg');
+    if (!text) { msgEl.hidden = true; return; }
+    msgEl.textContent = text;
+    msgEl.className = 'cart-checkout-msg' + (kind ? ' ' + kind : '');
+    msgEl.hidden = false;
+  }
+
+  async function doCheckout() {
+    if (cart.length === 0) return;
+    const btn = $('cart-checkout-btn');
+    const emailEl = $('cart-checkout-email');
+    const email = emailEl.value.trim();
+
+    setCheckoutMsg('');
+    if (!CHECKOUT_EMAIL_RE.test(email)) {
+      setCheckoutMsg('Enter a valid email for your receipt.', 'error');
+      emailEl.focus();
+      return;
+    }
+
+    btn.disabled = true;
+    const originalLabel = btn.textContent;
+    btn.textContent = 'Redirecting to secure checkout…';
+
+    try {
+      const resp = await fetch('/api/checkout/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          items: cart.map((c) => ({ product_id: c.id, variant_id: c.variant_id, quantity: c.qty })),
+        }),
+      });
+      const data = await resp.json();
+
+      if (resp.ok && data.checkout_url) {
+        window.location.href = data.checkout_url;
+        return;
+      }
+      if (resp.status === 503 && data.would_charge) {
+        const wc = data.would_charge;
+        setCheckoutMsg('Checkout isn’t enabled yet (payment processor not connected). Your total would be ' + formatPrice(wc.total_cents, wc.currency) + '.', 'info');
+      } else if (resp.status === 409) {
+        setCheckoutMsg('Some items in your cart changed (price or stock). Please review your cart and try again.', 'error');
+      } else {
+        setCheckoutMsg(data.error || 'Something went wrong, please try again.', 'error');
+      }
+    } catch (e) {
+      setCheckoutMsg('Network error, please try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+    }
+  }
+
+  // ---------------- Order confirmation (thank-you) view ----------------
+
+  function showOrderView(id) {
+    $('home-view').hidden = true;
+    $('product-view').hidden = true;
+    $('order-view').hidden = false;
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    const body = $('order-view-body');
+    body.innerHTML = 'Loading your order&hellip;';
+
+    const qIndex = location.hash.indexOf('?');
+    const query = qIndex >= 0 ? new URLSearchParams(location.hash.slice(qIndex + 1)) : new URLSearchParams();
+    const token = query.get('token');
+    if (!token) {
+      body.innerHTML = '<p>We couldn’t find that order. Check the link from your confirmation email.</p>';
+      return;
+    }
+
+    fetch('/api/orders/' + id + '?token=' + encodeURIComponent(token))
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error || !data.order) {
+          body.innerHTML = '<p>We couldn’t find that order. Check the link from your confirmation email.</p>';
+          return;
+        }
+        renderOrderView(data.order, data.items || []);
+      })
+      .catch(() => { body.innerHTML = '<p>Something went wrong loading your order.</p>'; });
+  }
+
+  function renderOrderView(order, items) {
+    const body = $('order-view-body');
+    const itemsHtml = items.map((i) => (
+      '<div class="order-line"><span>' + i.quantity + ' &times; ' + escapeHtml(i.name_snapshot) + '</span><span>' + formatPrice(i.line_cents, order.currency) + '</span></div>'
+    )).join('');
+    body.innerHTML =
+      '<span class="order-status-pill">' + escapeHtml(order.status) + '</span>' +
+      '<h1>Thanks for your order</h1>' +
+      '<p class="order-id">Order ' + escapeHtml(order.id) + '</p>' +
+      itemsHtml +
+      '<div class="order-totals">' +
+        '<div class="order-line"><span>Subtotal</span><span>' + formatPrice(order.subtotal_cents, order.currency) + '</span></div>' +
+        (order.discount_cents > 0 ? '<div class="order-line"><span>Discount</span><span>&minus;' + formatPrice(order.discount_cents, order.currency) + '</span></div>' : '') +
+        '<div class="order-line"><span>Shipping</span><span>' + formatPrice(order.shipping_cents, order.currency) + '</span></div>' +
+        '<div class="order-line"><span>Tax</span><span>' + formatPrice(order.tax_cents, order.currency) + '</span></div>' +
+        '<div class="order-line"><span>Total</span><span>' + formatPrice(order.total_cents, order.currency) + '</span></div>' +
+      '</div>' +
+      '<p style="margin-top:24px"><a class="back-link" href="#">Continue shopping</a></p>';
   }
 
   function openCart() {
@@ -1360,6 +1588,7 @@
   $('cart-toggle').addEventListener('click', openCart);
   $('cart-close').addEventListener('click', closeCart);
   $('cart-backdrop').addEventListener('click', closeCart);
+  $('cart-checkout-btn').addEventListener('click', doCheckout);
 
   // ---------------- Newsletter (real capture, no send logic here) ----------------
 
