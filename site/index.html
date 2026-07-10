@@ -449,7 +449,10 @@
   .featured-copy .data-strip { margin-bottom: 16px; }
   .featured-actions { display: flex; align-items: center; gap: 20px; }
   .featured-actions .price { font-size: 1.1rem; }
-  @media (max-width: 860px) { .featured-inner { grid-template-columns: 1fr; } .featured-media { height: 260px; } }
+  /* Same breakpoint as .tile-grid below: without this, the featured photo
+     goes full-width before the category tiles do, and its width/alignment
+     with the tile below it breaks in that gap. */
+  @media (max-width: 640px) { .featured-inner { grid-template-columns: 1fr; } .featured-media { height: 260px; } }
 
   /* ---------- Category tiles ---------- */
   .tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
