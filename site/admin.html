@@ -270,10 +270,14 @@
   .hero-dot-btn.active { background: #fff; color: var(--ink); border-color: #fff; }
 
   /* Category tiles: on the real site these are short, wide banners set by
-     padding + text content, not squares; approximated here as a fixed ratio. */
-  .mockup-tiles { display: flex; }
-  .site-mockup[data-view="mobile"] .mockup-tiles { flex-direction: column; }
-  .mockup-tile { flex: 1; aspect-ratio: 15 / 4; }
+     padding + text content, not squares; approximated here as a fixed ratio.
+     Uses grid (like the real .tile-grid), not flex: an aspect-ratio'd flex
+     item with an unconstrained sibling doesn't reliably split 50/50, since
+     the item's own in-flow content is empty (the <img> is absolute). Grid
+     tracks split evenly regardless of a child's aspect-ratio. */
+  .mockup-tiles { display: grid; grid-template-columns: 1fr 1fr; }
+  .site-mockup[data-view="mobile"] .mockup-tiles { grid-template-columns: 1fr; }
+  .mockup-tile { aspect-ratio: 15 / 4; }
   .site-mockup[data-view="mobile"] .mockup-tile { aspect-ratio: 7 / 3; }
   .mockup-tile-tint { position: absolute; inset: 0; z-index: 1; }
   .mockup-tile-copy { position: relative; z-index: 2; color: #fff; padding: 16px; display: flex; flex-direction: column; gap: 3px; }
@@ -281,12 +285,13 @@
   .mockup-tile-sub { font-size: 0.68rem; opacity: 0.9; }
 
   /* Brand story: real image + real paragraph side by side (stacked on mobile),
-     matching the real site's max-height:400px/260px image crop. */
-  .mockup-story-band { display: flex; border-top: 1px solid var(--line); }
-  .site-mockup[data-view="mobile"] .mockup-story-band { flex-direction: column; }
-  .mockup-story-img { flex: 1; aspect-ratio: 5 / 4; }
+     matching the real site's max-height:400px/260px image crop. Same grid
+     reasoning as .mockup-tiles above. */
+  .mockup-story-band { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
+  .site-mockup[data-view="mobile"] .mockup-story-band { grid-template-columns: 1fr; }
+  .mockup-story-img { aspect-ratio: 5 / 4; }
   .site-mockup[data-view="mobile"] .mockup-story-img { aspect-ratio: 6 / 5; }
-  .mockup-story-copy { flex: 1; padding: 18px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+  .mockup-story-copy { padding: 18px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
   .mockup-story-copy .mockup-eyebrow { color: var(--ink); opacity: 0.55; }
   .mockup-story-p { font-family: var(--font-display); font-size: 0.85rem; line-height: 1.5; margin: 0; opacity: 0.9; }
 
