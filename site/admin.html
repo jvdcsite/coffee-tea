@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin | Coffee & Tea</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=DM+Sans:wght@400;500;600;700&display=swap">
 <style>
   :root {
     /* "Cream & Cobalt" palette: matches site/index.html. */
@@ -16,9 +16,8 @@
     --gold: #B98A2E;
     --danger: #a13d2a;
     --line: rgba(29, 27, 23, 0.15);
-    --font-display: 'Space Grotesk', sans-serif;
+    --font-display: 'Outfit', sans-serif;
     --font-body: 'DM Sans', sans-serif;
-    --font-mono: 'IBM Plex Mono', monospace;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); }
@@ -87,7 +86,7 @@
   }
   .sidebar-brand { padding: 20px 16px 14px; border-bottom: 1px solid var(--line); }
   .sidebar-brand .brand-mark { display: block; font-family: var(--font-display); font-size: 1.05rem; line-height: 1.2; }
-  .sidebar-brand .brand-sub { display: block; font-family: var(--font-mono); font-size: 0.68rem; opacity: 0.5; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .sidebar-brand .brand-sub { display: block; font-family: var(--font-body); font-weight: 600; font-size: 0.68rem; opacity: 0.5; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
   .sidebar-nav { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
   .sidebar-footer { padding: 10px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
 
@@ -147,12 +146,12 @@
   .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   table { width: 100%; min-width: 560px; border-collapse: collapse; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
   th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 0.85rem; }
-  th { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
+  th { font-family: var(--font-body); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
   tr:last-child td { border-bottom: none; }
   tr.clickable { cursor: pointer; }
   tr.clickable:hover { background: rgba(28,20,16,0.03); }
 
-  .badge { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: rgba(28,20,16,0.08); }
+  .badge { font-family: var(--font-body); font-weight: 600; font-size: 0.68rem; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: rgba(28,20,16,0.08); }
 
   .card-box { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px; padding: 20px; margin-bottom: 20px; }
 
@@ -164,13 +163,13 @@
   .calc-box { background: rgba(201,138,62,0.1); border: 1px solid rgba(201,138,62,0.35); border-radius: 4px; padding: 14px; margin-top: 8px; }
   .calc-box .row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
   .calc-box .field { flex: 1; min-width: 120px; margin-bottom: 0; }
-  .calc-result { font-family: var(--font-mono); font-weight: 500; margin-top: 10px; font-size: 0.9rem; }
+  .calc-result { font-family: var(--font-body); font-weight: 500; margin-top: 10px; font-size: 0.9rem; }
 
   /* ---------- Site Media ---------- */
   .live-preview-wrap { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0 28px; }
   .live-preview-frame { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: #fff; }
   .live-preview-frame .frame-label {
-    font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+    font-family: var(--font-body); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
     opacity: 0.6; padding: 8px 12px; border-bottom: 1px solid var(--line);
   }
   .live-preview-viewport { overflow: hidden; }
@@ -180,7 +179,7 @@
   .media-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 4px; padding: 14px; }
   .media-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 4px; background: var(--paper); margin-bottom: 10px; display: block; }
   .media-card .media-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 2px; }
-  .media-card .media-meta { font-size: 0.7rem; opacity: 0.5; font-family: var(--font-mono); margin-bottom: 10px; }
+  .media-card .media-meta { font-size: 0.7rem; opacity: 0.5; font-family: var(--font-body); margin-bottom: 10px; }
   .media-card input[type="file"] { width: 100%; font-size: 0.78rem; }
 
   @media (max-width: 640px) {

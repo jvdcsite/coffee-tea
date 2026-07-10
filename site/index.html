@@ -28,7 +28,7 @@
 <meta name="description" content="Small-batch coffee and tea, sourced by origin and roasted or steeped with the details that matter.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400&family=DM+Sans:wght@400;500;600;700&display=swap">
 <style>
   :root {
     /* "Cream & Cobalt" palette: the only place color is defined. */
@@ -43,7 +43,6 @@
 
     --font-display: 'Outfit', sans-serif;
     --font-body: 'DM Sans', sans-serif;
-    --font-mono: 'IBM Plex Mono', monospace;
 
     /* Horizontal breathing room, used by .wrap and the hero slide content.
        Scales with viewport so it's never flush against the edge on either
@@ -68,7 +67,8 @@
   button { font-family: inherit; }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 var(--gutter); }
   .eyebrow {
-    font-family: var(--font-mono);
+    font-family: var(--font-body);
+    font-weight: 600;
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -114,7 +114,8 @@
   .utility-bar .wrap {
     padding: 8px var(--gutter);
     text-align: center;
-    font-family: var(--font-mono);
+    font-family: var(--font-body);
+    font-weight: 600;
     font-size: 0.72rem;
     letter-spacing: 0.04em;
   }
@@ -204,7 +205,7 @@
   .cart-count {
     position: absolute; top: -2px; right: -4px;
     background: var(--coffee); color: #fff;
-    font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600;
+    font-family: var(--font-body); font-size: 0.66rem; font-weight: 700;
     min-width: 16px; height: 16px; border-radius: 999px;
     display: flex; align-items: center; justify-content: center;
     padding: 0 3px;
@@ -295,7 +296,7 @@
     border: 1px solid rgba(255,255,255,0.5);
     background: rgba(255,255,255,0.12);
     color: #fff;
-    font-family: var(--font-mono); font-size: 0.7rem;
+    font-family: var(--font-body); font-weight: 600; font-size: 0.7rem;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
   }
@@ -334,14 +335,14 @@
   .card .swatch img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .card .tag {
     position: absolute; top: 10px; left: 10px;
-    font-family: var(--font-mono); font-size: 0.65rem;
+    font-family: var(--font-body); font-weight: 600; font-size: 0.68rem;
     text-transform: uppercase; letter-spacing: 0.08em;
     background: rgba(29,27,23,0.55); color: var(--paper);
     padding: 3px 8px; border-radius: 4px;
   }
   .card .badge {
     position: absolute; top: 10px; right: 10px;
-    font-family: var(--font-mono); font-size: 0.62rem;
+    font-family: var(--font-body); font-weight: 700; font-size: 0.64rem;
     text-transform: uppercase; letter-spacing: 0.06em;
     color: #fff; padding: 3px 8px; border-radius: 4px;
   }
@@ -353,8 +354,9 @@
   .card .origin { font-size: 0.85rem; opacity: 0.7; }
 
   .data-strip {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.78rem;
     display: flex; flex-wrap: wrap; gap: 6px 14px;
     padding: 8px 0;
     border-top: 1px dashed var(--line);
@@ -371,7 +373,7 @@
   .notes { font-size: 0.8rem; opacity: 0.75; }
 
   .card .footer { margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
-  .price { font-family: var(--font-mono); font-weight: 500; font-size: 0.95rem; }
+  .price { font-family: var(--font-body); font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
   .stock { font-size: 0.72rem; opacity: 0.6; }
 
   .quick-add {
@@ -390,12 +392,12 @@
     .quick-add { opacity: 1; transform: none; position: static; margin-top: 4px; align-self: flex-start; }
   }
 
-  .state-msg { padding: 60px 20px; text-align: center; opacity: 0.6; font-family: var(--font-mono); font-size: 0.85rem; }
+  .state-msg { padding: 60px 20px; text-align: center; opacity: 0.6; font-family: var(--font-body); font-size: 0.85rem; }
 
   /* ---------- Best sellers / catalog section heads ---------- */
   .catalog-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; }
   .catalog-head h2 { font-family: var(--font-display); font-weight: 300; font-size: 1.4rem; margin: 0; }
-  .count { font-family: var(--font-mono); font-size: 0.8rem; opacity: 0.6; }
+  .count { font-family: var(--font-body); font-weight: 500; font-size: 0.8rem; opacity: 0.6; }
 
   nav.tabs {
     display: flex; gap: 4px;
@@ -480,7 +482,7 @@
   .placeholder-section .wrap { max-width: 60ch; text-align: center; margin: 0 auto; }
   .placeholder-section h2 { font-family: var(--font-display); font-weight: 300; font-size: 1.6rem; margin: 0 0 10px; }
   .placeholder-section p { opacity: 0.7; margin: 0 0 4px; }
-  .placeholder-note { font-family: var(--font-mono); font-size: 0.72rem; opacity: 0.45; margin-top: 14px; }
+  .placeholder-note { font-family: var(--font-body); font-weight: 500; font-size: 0.72rem; opacity: 0.45; margin-top: 14px; }
 
   /* ---------- Product detail view ---------- */
   .product-view { padding: 48px 0 90px; }
@@ -527,12 +529,12 @@
     display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 24px; padding: 44px 0 24px;
   }
-  .footer-col h4 { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.55; margin: 0 0 14px; }
+  .footer-col h4 { font-family: var(--font-body); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.55; margin: 0 0 14px; }
   .footer-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
   .footer-col a, .link-disabled { font-size: 0.88rem; }
   .footer-col a:hover { opacity: 0.7; }
   .link-disabled { opacity: 0.4; cursor: default; display: inline-flex; gap: 6px; align-items: baseline; }
-  .link-disabled em { font-style: normal; font-family: var(--font-mono); font-size: 0.62rem; text-transform: uppercase; opacity: 0.8; }
+  .link-disabled em { font-style: normal; font-family: var(--font-body); font-weight: 600; font-size: 0.62rem; text-transform: uppercase; opacity: 0.8; }
   @media (max-width: 640px) { .footer-columns { grid-template-columns: 1fr; } }
 
   .footer-social { display: flex; gap: 14px; padding: 8px 0 24px; }
@@ -1288,7 +1290,7 @@
             '<button class="qty-btn" data-qty-minus="' + c.id + '" aria-label="Decrease quantity">&minus;</button>' +
             '<span>' + c.qty + '</span>' +
             '<button class="qty-btn" data-qty-plus="' + c.id + '" aria-label="Increase quantity">+</button>' +
-            '<span style="margin-left:auto;font-family:var(--font-mono);font-size:0.8rem">' + formatPrice(c.price_cents * c.qty, c.currency) + '</span>' +
+            '<span style="margin-left:auto;font-family:var(--font-body);font-weight:700;font-size:0.85rem">' + formatPrice(c.price_cents * c.qty, c.currency) + '</span>' +
           '</div>' +
           '<button class="cart-line-remove" data-remove="' + c.id + '">Remove</button>' +
         '</div>' +
