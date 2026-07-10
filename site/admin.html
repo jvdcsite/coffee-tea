@@ -170,74 +170,95 @@
   .calc-result { font-family: var(--font-body); font-weight: 500; margin-top: 10px; font-size: 0.9rem; }
 
   /* ---------- Site Media ---------- */
-  .live-preview-wrap { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0 28px; }
-  .live-preview-frame { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: #fff; }
-  .live-preview-frame .frame-label {
-    font-family: var(--font-body); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
-    opacity: 0.6; padding: 8px 12px; border-bottom: 1px solid var(--line);
+
+  /* Desktop / Mobile switcher, controls the .site-mockup[data-view] below.
+     This is a manual toggle, not a responsive breakpoint. */
+  .view-switch { display: inline-flex; gap: 3px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 3px; margin: 18px 0 4px; }
+  .view-switch-btn { border: none; background: transparent; padding: 7px 16px; border-radius: 999px; font-weight: 600; font-size: 0.82rem; cursor: pointer; color: var(--ink); opacity: 0.6; }
+  .view-switch-btn.active { background: var(--ink); color: var(--paper); opacity: 1; }
+
+  .mockup-help { font-size: 0.82rem; opacity: 0.6; max-width: 60ch; margin: 8px 0 18px; }
+
+  .site-mockup {
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+    background: #fff; margin: 0 0 10px; transition: max-width 0.2s ease;
   }
-  .live-preview-viewport { overflow: hidden; }
-  .live-preview-viewport iframe { border: none; display: block; transform-origin: top left; pointer-events: none; }
+  .site-mockup[data-view="desktop"] { max-width: 640px; }
+  .site-mockup[data-view="mobile"] { max-width: 300px; }
 
-  .media-group { margin-bottom: 30px; }
-  .media-group-head { margin-bottom: 12px; }
-  .media-group-head h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 400; margin-bottom: 3px; }
-  .media-group-head p { font-size: 0.82rem; opacity: 0.65; margin: 0; max-width: 60ch; }
+  .mockup-topbar { padding: 12px 18px; border-bottom: 1px solid var(--line); font-family: var(--font-display); font-size: 1rem; }
+  .mockup-topbar .amp { color: var(--tea); }
 
-  .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
-  .media-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
+  /* Every real photo area doubles as a drop target: the image itself IS
+     the control, no separate thumbnail/button pair to parse. */
+  .mockup-drop { position: relative; display: block; cursor: pointer; overflow: hidden; background: var(--paper); }
+  .mockup-drop img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mockup-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
-  /* Small reference preview of what's currently live, deliberately not the
-     main interactive element, so it can't be confused with the dropzone. */
-  .media-current { position: relative; margin-bottom: 8px; }
-  .media-current img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; background: var(--paper); display: block; opacity: 0.92; }
-  .media-current-tag {
-    position: absolute; top: 7px; left: 7px;
+  /* Small always-on badge marks a photo as editable, so touch users don't
+     need a hover state to discover it. */
+  .mockup-drop-badge {
+    position: absolute; bottom: 8px; right: 8px;
+    width: 30px; height: 30px; border-radius: 50%;
     background: rgba(29,27,23,0.72); color: #fff;
-    font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
-    padding: 3px 7px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.15s ease;
   }
-
-  /* The dropzone is the one obvious place to interact with. */
-  .media-dropzone {
-    position: relative;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-    text-align: center;
-    border: 2px dashed rgba(29,27,23,0.25);
-    border-radius: 6px;
-    padding: 16px 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    color: var(--ink);
-    transition: border-color 0.15s ease, background 0.15s ease;
+  /* Full overlay reinforces it on hover/drag, with instructions. */
+  .mockup-drop-overlay {
+    position: absolute; inset: 0;
+    background: rgba(20,16,12,0.6); color: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    text-align: center; padding: 10px;
+    opacity: 0; transition: opacity 0.15s ease;
+    font-size: 0.8rem; font-weight: 600;
+    pointer-events: none;
   }
-  .media-dropzone svg { opacity: 0.55; transition: opacity 0.15s ease; }
-  .media-dropzone:hover { border-color: rgba(29,27,23,0.45); background: rgba(29,27,23,0.025); }
-  .media-dropzone:hover svg { opacity: 0.8; }
-  .media-dropzone.drag-over { border-color: var(--coffee); background: rgba(44,74,110,0.07); border-style: solid; }
-  .media-dropzone .dz-text { font-size: 0.8rem; font-weight: 600; }
-  .media-dropzone .dz-subtext { font-size: 0.7rem; opacity: 0.55; }
-  .media-dropzone input[type="file"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-
-  .dz-text-mobile, .dz-uploading { display: none; }
+  .mockup-drop:hover .mockup-drop-overlay, .mockup-drop:focus-within .mockup-drop-overlay, .mockup-drop.drag-over .mockup-drop-overlay { opacity: 1; }
+  .mockup-drop:hover .mockup-drop-badge { opacity: 0; }
+  .mockup-drop.drag-over { outline: 3px solid var(--coffee); outline-offset: -3px; }
+  .mockup-drop-overlay .ov-mobile, .mockup-drop-overlay .ov-uploading { display: none; }
   @media (hover: none), (pointer: coarse) {
-    .dz-text-desktop { display: none; }
-    .dz-text-mobile { display: block; }
+    .mockup-drop-overlay .ov-desktop { display: none; }
+    .mockup-drop-overlay .ov-mobile { display: block; }
+    .mockup-drop-badge { opacity: 1; } /* no hover on touch: keep the badge as the only cue, always visible */
   }
-  .media-dropzone.uploading .dz-text-desktop,
-  .media-dropzone.uploading .dz-text-mobile,
-  .media-dropzone.uploading .dz-subtext { display: none; }
-  .media-dropzone.uploading .dz-uploading { display: block; }
-  .media-dropzone.uploading svg { animation: dz-pulse 1.1s ease-in-out infinite; }
-  @keyframes dz-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.9; } }
+  .mockup-drop.uploading .mockup-drop-overlay { opacity: 1; }
+  .mockup-drop.uploading .ov-desktop, .mockup-drop.uploading .ov-mobile { display: none; }
+  .mockup-drop.uploading .ov-uploading { display: block; }
 
-  .media-card .media-label { font-weight: 600; font-size: 0.88rem; margin-bottom: 3px; }
-  .media-card .media-meta { font-size: 0.7rem; opacity: 0.45; font-family: var(--font-body); }
-  .media-card .media-meta.is-updated { opacity: 1; color: var(--coffee); font-weight: 600; }
-
-  @media (max-width: 640px) {
-    .live-preview-wrap { justify-content: center; }
+  .mockup-hero { aspect-ratio: 16 / 8; }
+  .site-mockup[data-view="mobile"] .mockup-hero { aspect-ratio: 3 / 4; }
+  .mockup-hero-dots { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
+  .hero-dot-btn {
+    width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.15); color: #fff; font-size: 0.68rem; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
   }
+  .hero-dot-btn.active { background: #fff; color: var(--ink); border-color: #fff; }
+
+  .mockup-tiles { display: flex; }
+  .site-mockup[data-view="mobile"] .mockup-tiles { flex-direction: column; }
+  .mockup-tile { flex: 1; aspect-ratio: 4 / 3; border-left: 1px solid var(--line); }
+  .mockup-tiles .mockup-tile:first-child { border-left: none; }
+  .site-mockup[data-view="mobile"] .mockup-tile { border-left: none; border-top: 1px solid var(--line); }
+  .site-mockup[data-view="mobile"] .mockup-tiles .mockup-tile:first-child { border-top: none; }
+  .mockup-tile-name {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(29,27,23,0.6); color: #fff; font-size: 0.65rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 7px; border-radius: 4px;
+  }
+
+  .mockup-story { aspect-ratio: 16 / 7; border-top: 1px solid var(--line); }
+  .site-mockup[data-view="mobile"] .mockup-story { aspect-ratio: 4 / 3; }
+
+  .mockup-legend { font-size: 0.76rem; opacity: 0.55; max-width: 70ch; margin: 4px 0 26px; line-height: 1.6; }
+  .mockup-legend b { font-weight: 600; opacity: 0.85; }
+
+  .fallback-slot { display: flex; align-items: center; gap: 14px; padding: 14px; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; max-width: 460px; }
+  .fallback-slot .mockup-drop { width: 64px; height: 64px; flex-shrink: 0; border-radius: 6px; }
+  .fallback-slot-copy .fs-title { font-weight: 600; font-size: 0.86rem; margin-bottom: 2px; }
+  .fallback-slot-copy .fs-desc { font-size: 0.78rem; opacity: 0.6; }
 
   .toast {
     position: fixed; bottom: 20px; right: 20px;
@@ -407,29 +428,23 @@
         <button class="btn secondary" id="sitemedia-refresh-btn">Refresh</button>
       </div>
       <p style="opacity:0.7;font-size:0.88rem;max-width:70ch;margin-top:-6px">
-        These are the photos shown on your homepage, grouped by where they appear
-        below. Tap "Change photo" under any image to replace it — your new photo
-        goes live right away, no other steps needed.
+        This is a preview of your homepage. Switch between Desktop and Mobile,
+        then drag a photo onto any image below to replace it (or tap it to
+        choose one from your device) — it goes live right away.
       </p>
 
-      <div class="live-preview-wrap">
-        <div class="live-preview-frame">
-          <div class="frame-label">Desktop</div>
-          <div class="live-preview-viewport" style="width:460px;height:288px">
-            <iframe id="preview-desktop" src="/" style="width:1280px;height:800px;transform:scale(0.359375)"></iframe>
-          </div>
-        </div>
-        <div class="live-preview-frame">
-          <div class="frame-label">Mobile</div>
-          <div class="live-preview-viewport" style="width:220px;height:429px">
-            <iframe id="preview-mobile" src="/" style="width:390px;height:760px;transform:scale(0.564)"></iframe>
-          </div>
-        </div>
+      <div class="view-switch" role="tablist" aria-label="Preview device">
+        <button class="view-switch-btn active" data-view="desktop">Desktop</button>
+        <button class="view-switch-btn" data-view="mobile">Mobile</button>
       </div>
 
-      <div class="media-grid" id="sitemedia-grid">
-        <p style="opacity:0.6;font-size:0.85rem">Loading…</p>
+      <div class="site-mockup" id="site-mockup" data-view="desktop">
+        <p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Loading…</p>
       </div>
+
+      <div class="mockup-legend" id="mockup-legend"></div>
+
+      <div class="fallback-slot" id="fallback-slot"></div>
     </section>
 
     <!-- ---- Orders ----
@@ -806,83 +821,115 @@
   // at marketing/{slot}.webp immediately; no D1 row, no "save" step.
 
   let siteMediaSlots = [];
+  let activeHeroSlot = 'hero-1';
 
-  // Plain-language grouping + guidance for beginners; the server's `label`
-  // stays as the technical fallback title if a slot isn't in this map.
-  const SITE_MEDIA_COPY = {
-    'hero-1': { group: 'Homepage banner', groupDesc: 'These three photos rotate automatically at the very top of your homepage.', title: 'Banner photo 1 of 3', hint: 'A bright, wide photo works best.' },
-    'hero-2': { group: 'Homepage banner', title: 'Banner photo 2 of 3', hint: 'A bright, wide photo works best.' },
-    'hero-3': { group: 'Homepage banner', title: 'Banner photo 3 of 3', hint: 'A bright, wide photo works best.' },
-    'category-coffee': { group: 'Category tiles', groupDesc: 'Shown on the two tiles that link visitors to your Coffee and Tea sections.', title: 'Coffee tile photo', hint: 'A square-ish photo works best.' },
-    'category-tea': { group: 'Category tiles', title: 'Tea tile photo', hint: 'A square-ish photo works best.' },
-    'brand-story': { group: 'Your story', groupDesc: 'Shown next to the paragraph about your shop and sourcing.', title: 'Story photo', hint: 'Any clear photo works.' },
-    'product-placeholder': { group: 'Default product photo', groupDesc: 'Used automatically for any product that doesn’t have its own photo yet.', title: 'Fallback photo', hint: 'A neutral, simple photo works best.' },
+  const SITE_MEDIA_LEGEND = {
+    'hero-1': 'Banner 1', 'hero-2': 'Banner 2', 'hero-3': 'Banner 3',
+    'category-coffee': 'Coffee tile', 'category-tea': 'Tea tile',
+    'brand-story': 'Story photo', 'product-placeholder': 'Fallback photo',
   };
 
   async function loadSiteMedia() {
-    $('sitemedia-grid').innerHTML = '<p style="opacity:0.6;font-size:0.85rem">Loading…</p>';
+    $('site-mockup').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Loading…</p>';
     try {
       const res = await api('/admin/site-media');
       const data = await res.json();
       siteMediaSlots = data.slots || [];
-      renderSiteMediaGrid();
+      renderSiteMockup();
+      renderFallbackSlot();
+      renderLegend();
     } catch (err) {
-      $('sitemedia-grid').innerHTML = '<p style="opacity:0.6;font-size:0.85rem">Failed to load: ' + err.message + '</p>';
+      $('site-mockup').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Failed to load: ' + err.message + '</p>';
     }
   }
 
-  function uploadCloudIcon() {
-    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 18a4.5 4.5 0 01-1-8.88 5.5 5.5 0 0110.55-2A4.5 4.5 0 0117.5 18H7z"/><path d="M12 12v7"/><path d="M9.5 14.5L12 12l2.5 2.5"/></svg>';
+  function slotBySlug(slug) {
+    return siteMediaSlots.find((s) => s.slot === slug);
   }
 
-  function renderSiteMediaGrid() {
-    let lastGroup = null;
-    const parts = [];
-    siteMediaSlots.forEach((s) => {
-      const copy = SITE_MEDIA_COPY[s.slot] || { group: s.label, title: s.label, hint: 'At least ' + s.maxDim + 'px wide works best.' };
-      if (copy.group !== lastGroup) {
-        if (lastGroup !== null) parts.push('</div></div>');
-        parts.push(
-          '<div class="media-group"><div class="media-group-head"><h3>' + escapeHtml(copy.group) + '</h3>' +
-          (copy.groupDesc ? '<p>' + escapeHtml(copy.groupDesc) + '</p>' : '') +
-          '</div><div class="media-grid">'
-        );
-        lastGroup = copy.group;
-      }
-      const updatedText = s.uploaded
-        ? 'Last updated ' + new Date(s.uploaded).toLocaleDateString()
-        : 'Using the starting default photo';
-      parts.push(
-        '<div class="media-card" data-slot="' + s.slot + '">' +
-          '<div class="media-current">' +
-            '<img src="/media/marketing/' + s.slot + '.webp?t=' + Date.now() + '" alt="">' +
-            '<span class="media-current-tag">Currently live</span>' +
-          '</div>' +
-          '<label class="media-dropzone" data-slot="' + s.slot + '">' +
-            uploadCloudIcon() +
-            '<span class="dz-text dz-text-desktop">Drag a photo here, or click to browse</span>' +
-            '<span class="dz-text dz-text-mobile">Tap to choose a photo</span>' +
-            '<span class="dz-text dz-uploading">Uploading…</span>' +
-            '<span class="dz-subtext">' + escapeHtml(copy.hint) + '</span>' +
-            '<input type="file" accept="image/*" data-slot="' + s.slot + '" data-maxdim="' + s.maxDim + '" class="sitemedia-input">' +
-          '</label>' +
-          '<div class="media-label">' + escapeHtml(copy.title) + '</div>' +
-          '<div class="media-meta">' + escapeHtml(updatedText) + '</div>' +
-        '</div>'
-      );
-    });
-    if (lastGroup !== null) parts.push('</div></div>');
-    $('sitemedia-grid').innerHTML = parts.join('');
+  function uploadCloudIcon() {
+    return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 18a4.5 4.5 0 01-1-8.88 5.5 5.5 0 0110.55-2A4.5 4.5 0 0117.5 18H7z"/><path d="M12 12v7"/><path d="M9.5 14.5L12 12l2.5 2.5"/></svg>';
+  }
 
-    $('sitemedia-grid').querySelectorAll('.sitemedia-input').forEach((input) => {
-      input.addEventListener('change', () => {
-        if (input.files[0]) uploadSiteMediaSlot(input.dataset.slot, Number(input.dataset.maxdim), input.files[0]);
+  function cameraBadgeIcon() {
+    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="14" r="3.5"/></svg>';
+  }
+
+  // A single photo IS the control: no separate thumbnail-plus-button pair
+  // to parse. `innerExtra` carries slot-specific overlays (hero dots, tile name).
+  function mediaDropMarkup(slot, maxDim, extraClass, innerExtra) {
+    const src = '/media/marketing/' + slot + '.webp?t=' + Date.now();
+    return (
+      '<div class="mockup-drop' + (extraClass ? ' ' + extraClass : '') + '" data-slot="' + slot + '" data-maxdim="' + maxDim + '">' +
+        '<img src="' + src + '" alt="">' +
+        (innerExtra || '') +
+        '<div class="mockup-drop-badge">' + cameraBadgeIcon() + '</div>' +
+        '<div class="mockup-drop-overlay">' +
+          uploadCloudIcon() +
+          '<span class="ov-desktop">Drop a photo here, or click to browse</span>' +
+          '<span class="ov-mobile">Tap to choose a photo</span>' +
+          '<span class="ov-uploading">Uploading…</span>' +
+        '</div>' +
+        '<input type="file" accept="image/*" class="sitemedia-input" style="display:none">' +
+      '</div>'
+    );
+  }
+
+  function renderSiteMockup() {
+    const heroDots = '<div class="mockup-hero-dots">' +
+      ['hero-1', 'hero-2', 'hero-3'].map((slug, i) => (
+        '<button type="button" class="hero-dot-btn' + (slug === activeHeroSlot ? ' active' : '') + '" data-hero-slot="' + slug + '">' + (i + 1) + '</button>'
+      )).join('') +
+    '</div>';
+
+    $('site-mockup').innerHTML =
+      '<div class="mockup-topbar">Coffee <span class="amp">&amp;</span> Tea</div>' +
+      mediaDropMarkup(activeHeroSlot, 1600, 'mockup-hero', heroDots) +
+      '<div class="mockup-tiles">' +
+        mediaDropMarkup('category-coffee', 800, 'mockup-tile', '<span class="mockup-tile-name">Coffee</span>') +
+        mediaDropMarkup('category-tea', 800, 'mockup-tile', '<span class="mockup-tile-name">Tea</span>') +
+      '</div>' +
+      mediaDropMarkup('brand-story', 1200, 'mockup-story');
+
+    wireDropzones($('site-mockup'));
+    $('site-mockup').querySelectorAll('.hero-dot-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        activeHeroSlot = btn.dataset.heroSlot;
+        renderSiteMockup();
       });
     });
+  }
 
-    $('sitemedia-grid').querySelectorAll('.media-dropzone').forEach((zone) => {
-      const slot = zone.dataset.slot;
-      const maxDim = Number(zone.querySelector('.sitemedia-input').dataset.maxdim);
+  function renderFallbackSlot() {
+    $('fallback-slot').innerHTML =
+      mediaDropMarkup('product-placeholder', 800) +
+      '<div class="fallback-slot-copy">' +
+        '<div class="fs-title">Default product photo</div>' +
+        '<div class="fs-desc">Not shown on the homepage itself — used automatically for any product that doesn’t have its own photo yet.</div>' +
+      '</div>';
+    wireDropzones($('fallback-slot'));
+  }
+
+  function renderLegend() {
+    const order = ['hero-1', 'hero-2', 'hero-3', 'category-coffee', 'category-tea', 'brand-story', 'product-placeholder'];
+    $('mockup-legend').innerHTML = order.map((slug) => {
+      const s = slotBySlug(slug);
+      const status = s && s.uploaded ? new Date(s.uploaded).toLocaleDateString() : 'default photo';
+      return '<b>' + escapeHtml(SITE_MEDIA_LEGEND[slug] || slug) + ':</b> ' + escapeHtml(status);
+    }).join(' &nbsp;·&nbsp; ');
+  }
+
+  function wireDropzones(container) {
+    container.querySelectorAll('.mockup-drop').forEach((zone) => {
+      const input = zone.querySelector('.sitemedia-input');
+      input.addEventListener('change', () => {
+        if (input.files[0]) uploadSiteMediaSlot(zone.dataset.slot, Number(zone.dataset.maxdim), input.files[0]);
+      });
+      zone.addEventListener('click', (e) => {
+        if (e.target.closest('.hero-dot-btn')) return;
+        input.click();
+      });
       let dragDepth = 0;
       zone.addEventListener('dragenter', (e) => {
         e.preventDefault();
@@ -900,36 +947,34 @@
         dragDepth = 0;
         zone.classList.remove('drag-over');
         const file = e.dataTransfer.files && e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) uploadSiteMediaSlot(slot, maxDim, file);
+        if (file && file.type.startsWith('image/')) uploadSiteMediaSlot(zone.dataset.slot, Number(zone.dataset.maxdim), file);
         else if (file) showToast('That file isn’t a photo, try a JPG or PNG.');
       });
     });
   }
 
   async function uploadSiteMediaSlot(slot, maxDim, file) {
-    const card = $('sitemedia-grid').querySelector('.media-card[data-slot="' + slot + '"]');
-    const zone = card ? card.querySelector('.media-dropzone') : null;
+    const zone = document.querySelector('.mockup-drop[data-slot="' + slot + '"]');
     if (zone) zone.classList.add('uploading');
     try {
       const webp = await resizeToWebp(file, maxDim);
       await api('/admin/site-media/' + slot, { method: 'POST', headers: { 'Content-Type': 'image/webp' }, body: webp });
       showToast('Photo updated.');
       await loadSiteMedia();
-      refreshLivePreviews();
     } catch (err) {
       if (zone) zone.classList.remove('uploading');
       showToast('Upload failed: ' + err.message);
     }
   }
 
-  function refreshLivePreviews() {
-    ['preview-desktop', 'preview-mobile'].forEach((id) => {
-      const frame = $(id);
-      frame.src = '/?t=' + Date.now();
+  document.querySelectorAll('.view-switch-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.view-switch-btn').forEach((b) => b.classList.toggle('active', b === btn));
+      $('site-mockup').dataset.view = btn.dataset.view;
     });
-  }
+  });
 
-  $('sitemedia-refresh-btn').addEventListener('click', () => { loadSiteMedia(); refreshLivePreviews(); });
+  $('sitemedia-refresh-btn').addEventListener('click', loadSiteMedia);
 
   // ---------------- Newsletter ----------------
 
