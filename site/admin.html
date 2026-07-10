@@ -186,28 +186,40 @@
   .site-mockup[data-view="desktop"] { max-width: 640px; }
   .site-mockup[data-view="mobile"] { max-width: 300px; }
 
-  .mockup-topbar { padding: 12px 18px; border-bottom: 1px solid var(--line); font-family: var(--font-display); font-size: 1rem; }
-  .mockup-topbar .amp { color: var(--tea); }
+  /* Real chrome above the fold, for orientation only (not interactive). */
+  .mockup-utility {
+    background: var(--ink); color: var(--paper); text-align: center;
+    font-weight: 600; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 6px 10px;
+  }
+  .mockup-topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+  .mockup-brand { font-family: var(--font-display); font-size: 1rem; }
+  .mockup-brand .amp { color: var(--tea); }
+  .mockup-nav-links { display: flex; gap: 14px; font-size: 0.68rem; font-weight: 600; opacity: 0.75; }
+  .site-mockup[data-view="mobile"] .mockup-nav-links { display: none; }
+  .mockup-cart svg { width: 17px; height: 17px; display: block; opacity: 0.8; }
 
   /* Every real photo area doubles as a drop target: the image itself IS
      the control, no separate thumbnail/button pair to parse. */
   .mockup-drop { position: relative; display: block; cursor: pointer; overflow: hidden; background: var(--paper); }
-  .mockup-drop img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mockup-drop img { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
   .mockup-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
   /* Small always-on badge marks a photo as editable, so touch users don't
      need a hover state to discover it. */
   .mockup-drop-badge {
-    position: absolute; bottom: 8px; right: 8px;
+    position: absolute; bottom: 8px; right: 8px; z-index: 3;
     width: 30px; height: 30px; border-radius: 50%;
     background: rgba(29,27,23,0.72); color: #fff;
     display: flex; align-items: center; justify-content: center;
     transition: opacity 0.15s ease;
   }
-  /* Full overlay reinforces it on hover/drag, with instructions. */
+  /* Full overlay reinforces it on hover/drag, with instructions; opaque
+     enough to fully mask the baked-in headline/label text underneath so
+     the upload prompt stays legible. */
   .mockup-drop-overlay {
-    position: absolute; inset: 0;
-    background: rgba(20,16,12,0.6); color: #fff;
+    position: absolute; inset: 0; z-index: 4;
+    background: rgba(15,12,9,0.82); color: #fff;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
     text-align: center; padding: 10px;
     opacity: 0; transition: opacity 0.15s ease;
@@ -227,9 +239,23 @@
   .mockup-drop.uploading .ov-desktop, .mockup-drop.uploading .ov-mobile { display: none; }
   .mockup-drop.uploading .ov-uploading { display: block; }
 
-  .mockup-hero { aspect-ratio: 16 / 8; }
+  /* Hero: matches the real per-slide color tint + left-aligned copy block,
+     so switching slides previews the actual headline/button that goes with it. */
+  .mockup-hero { aspect-ratio: 21 / 10; }
   .site-mockup[data-view="mobile"] .mockup-hero { aspect-ratio: 3 / 4; }
-  .mockup-hero-dots { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
+  .mockup-hero-tint { position: absolute; inset: 0; z-index: 1; }
+  .mockup-hero-copy {
+    position: absolute; inset: 0; z-index: 2; color: #fff;
+    display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+    max-width: 60%; padding: 0 7%;
+  }
+  .site-mockup[data-view="mobile"] .mockup-hero-copy { max-width: 80%; }
+  .mockup-eyebrow { display: block; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; margin-bottom: 8px; }
+  .mockup-h1 { font-family: var(--font-display); font-weight: 300; font-size: 1.3rem; line-height: 1.15; margin: 0 0 8px; }
+  .site-mockup[data-view="mobile"] .mockup-h1 { font-size: 1.05rem; }
+  .mockup-hero-p { font-size: 0.74rem; opacity: 0.92; margin: 0 0 12px; max-width: 32ch; }
+  .mockup-fake-btn { display: inline-block; background: var(--ink); color: var(--paper); font-size: 0.7rem; font-weight: 600; padding: 8px 16px; border-radius: 4px; }
+  .mockup-hero-dots { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; gap: 6px; z-index: 3; }
   .hero-dot-btn {
     width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.6);
     background: rgba(255,255,255,0.15); color: #fff; font-size: 0.68rem; font-weight: 600;
@@ -237,23 +263,22 @@
   }
   .hero-dot-btn.active { background: #fff; color: var(--ink); border-color: #fff; }
 
+  /* Category tiles: tinted background + baked-in label, top-left like the real site. */
   .mockup-tiles { display: flex; }
   .site-mockup[data-view="mobile"] .mockup-tiles { flex-direction: column; }
-  .mockup-tile { flex: 1; aspect-ratio: 4 / 3; border-left: 1px solid var(--line); }
-  .mockup-tiles .mockup-tile:first-child { border-left: none; }
-  .site-mockup[data-view="mobile"] .mockup-tile { border-left: none; border-top: 1px solid var(--line); }
-  .site-mockup[data-view="mobile"] .mockup-tiles .mockup-tile:first-child { border-top: none; }
-  .mockup-tile-name {
-    position: absolute; top: 8px; left: 8px;
-    background: rgba(29,27,23,0.6); color: #fff; font-size: 0.65rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 7px; border-radius: 4px;
-  }
+  .mockup-tile { flex: 1; aspect-ratio: 4 / 3; }
+  .mockup-tile-tint { position: absolute; inset: 0; z-index: 1; }
+  .mockup-tile-copy { position: relative; z-index: 2; color: #fff; padding: 16px; display: flex; flex-direction: column; gap: 3px; }
+  .mockup-tile-label { font-family: var(--font-display); font-weight: 300; font-size: 1.05rem; }
+  .mockup-tile-sub { font-size: 0.68rem; opacity: 0.9; }
 
-  .mockup-story { aspect-ratio: 16 / 7; border-top: 1px solid var(--line); }
-  .site-mockup[data-view="mobile"] .mockup-story { aspect-ratio: 4 / 3; }
-
-  .mockup-legend { font-size: 0.76rem; opacity: 0.55; max-width: 70ch; margin: 4px 0 26px; line-height: 1.6; }
-  .mockup-legend b { font-weight: 600; opacity: 0.85; }
+  /* Brand story: real image + real paragraph side by side (stacked on mobile). */
+  .mockup-story-band { display: flex; border-top: 1px solid var(--line); }
+  .site-mockup[data-view="mobile"] .mockup-story-band { flex-direction: column; }
+  .mockup-story-img { flex: 1; aspect-ratio: 4 / 3; }
+  .mockup-story-copy { flex: 1; padding: 18px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+  .mockup-story-copy .mockup-eyebrow { color: var(--ink); opacity: 0.55; }
+  .mockup-story-p { font-family: var(--font-display); font-size: 0.85rem; line-height: 1.5; margin: 0; opacity: 0.9; }
 
   .fallback-slot { display: flex; align-items: center; gap: 14px; padding: 14px; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; max-width: 460px; }
   .fallback-slot .mockup-drop { width: 64px; height: 64px; flex-shrink: 0; border-radius: 6px; }
@@ -430,7 +455,7 @@
       <p style="opacity:0.7;font-size:0.88rem;max-width:70ch;margin-top:-6px">
         This is a preview of your homepage. Switch between Desktop and Mobile,
         then drag a photo onto any image below to replace it (or tap it to
-        choose one from your device) — it goes live right away.
+        choose one from your device). It goes live right away.
       </p>
 
       <div class="view-switch" role="tablist" aria-label="Preview device">
@@ -442,9 +467,7 @@
         <p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Loading…</p>
       </div>
 
-      <div class="mockup-legend" id="mockup-legend"></div>
-
-      <div class="fallback-slot" id="fallback-slot"></div>
+      <div class="fallback-slot" id="fallback-slot" style="margin-top:16px"></div>
     </section>
 
     <!-- ---- Orders ----
@@ -820,31 +843,25 @@
   // resizeToWebp() as product photos; each upload replaces the R2 object
   // at marketing/{slot}.webp immediately; no D1 row, no "save" step.
 
-  let siteMediaSlots = [];
   let activeHeroSlot = 'hero-1';
 
-  const SITE_MEDIA_LEGEND = {
-    'hero-1': 'Banner 1', 'hero-2': 'Banner 2', 'hero-3': 'Banner 3',
-    'category-coffee': 'Coffee tile', 'category-tea': 'Tea tile',
-    'brand-story': 'Story photo', 'product-placeholder': 'Fallback photo',
+  // Real copy pulled straight from site/index.html so switching hero slides
+  // previews the actual headline/tint/button that ships with each photo.
+  const HERO_CONTENT = {
+    'hero-1': { tint: 'rgba(22,40,59,0.55)', eyebrow: 'Roasted in small batches', h1: 'Small batches, honest sourcing.', p: 'Origin, altitude, and process on every bag, because the details change how it tastes.', btn: 'Shop coffee' },
+    'hero-2': { tint: 'rgba(122,90,27,0.55)', eyebrow: 'Steeped, not guessed', h1: 'Tea sourced the same way we source coffee.', p: 'Same rigor, same transparency: leaf type, oxidation, and where it grew.', btn: 'Shop tea' },
+    'hero-3': { tint: 'rgba(29,27,23,0.55)', eyebrow: 'Small batch, always fresh', h1: 'Start with what everyone’s reaching for.', p: 'The lots and leaves that sell out first, restocked in small runs, not warehoused.', btn: 'Shop best sellers' },
   };
 
   async function loadSiteMedia() {
     $('site-mockup').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Loading…</p>';
     try {
-      const res = await api('/admin/site-media');
-      const data = await res.json();
-      siteMediaSlots = data.slots || [];
+      await api('/admin/site-media');
       renderSiteMockup();
       renderFallbackSlot();
-      renderLegend();
     } catch (err) {
       $('site-mockup').innerHTML = '<p style="padding:40px;opacity:0.6;font-size:0.85rem;margin:0">Failed to load: ' + err.message + '</p>';
     }
-  }
-
-  function slotBySlug(slug) {
-    return siteMediaSlots.find((s) => s.slot === slug);
   }
 
   function uploadCloudIcon() {
@@ -876,20 +893,47 @@
   }
 
   function renderSiteMockup() {
-    const heroDots = '<div class="mockup-hero-dots">' +
-      ['hero-1', 'hero-2', 'hero-3'].map((slug, i) => (
-        '<button type="button" class="hero-dot-btn' + (slug === activeHeroSlot ? ' active' : '') + '" data-hero-slot="' + slug + '">' + (i + 1) + '</button>'
-      )).join('') +
-    '</div>';
+    const hc = HERO_CONTENT[activeHeroSlot];
+    const heroInner =
+      '<div class="mockup-hero-tint" style="background:' + hc.tint + '"></div>' +
+      '<div class="mockup-hero-copy">' +
+        '<span class="mockup-eyebrow">' + escapeHtml(hc.eyebrow) + '</span>' +
+        '<h1 class="mockup-h1">' + escapeHtml(hc.h1) + '</h1>' +
+        '<p class="mockup-hero-p">' + escapeHtml(hc.p) + '</p>' +
+        '<span class="mockup-fake-btn">' + escapeHtml(hc.btn) + '</span>' +
+      '</div>' +
+      '<div class="mockup-hero-dots">' +
+        ['hero-1', 'hero-2', 'hero-3'].map((slug, i) => (
+          '<button type="button" class="hero-dot-btn' + (slug === activeHeroSlot ? ' active' : '') + '" data-hero-slot="' + slug + '">' + (i + 1) + '</button>'
+        )).join('') +
+      '</div>';
+
+    const coffeeInner =
+      '<div class="mockup-tile-tint" style="background:rgba(22,40,59,0.72)"></div>' +
+      '<div class="mockup-tile-copy"><span class="mockup-tile-label">Coffee</span><span class="mockup-tile-sub">Browse all coffee</span></div>';
+    const teaInner =
+      '<div class="mockup-tile-tint" style="background:rgba(122,90,27,0.72)"></div>' +
+      '<div class="mockup-tile-copy"><span class="mockup-tile-label">Tea</span><span class="mockup-tile-sub">Browse all tea</span></div>';
 
     $('site-mockup').innerHTML =
-      '<div class="mockup-topbar">Coffee <span class="amp">&amp;</span> Tea</div>' +
-      mediaDropMarkup(activeHeroSlot, 1600, 'mockup-hero', heroDots) +
-      '<div class="mockup-tiles">' +
-        mediaDropMarkup('category-coffee', 800, 'mockup-tile', '<span class="mockup-tile-name">Coffee</span>') +
-        mediaDropMarkup('category-tea', 800, 'mockup-tile', '<span class="mockup-tile-name">Tea</span>') +
+      '<div class="mockup-utility">Free shipping on orders over $40</div>' +
+      '<div class="mockup-topbar">' +
+        '<span class="mockup-brand">Coffee <span class="amp">&amp;</span> Tea</span>' +
+        '<nav class="mockup-nav-links"><span>Shop</span><span>Best Sellers</span><span>Subscriptions</span><span>Find Us</span></nav>' +
+        '<span class="mockup-cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h2l1.6 10.2A2 2 0 0 0 8.6 16h8.8a2 2 0 0 0 2-1.7L21 7H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg></span>' +
       '</div>' +
-      mediaDropMarkup('brand-story', 1200, 'mockup-story');
+      mediaDropMarkup(activeHeroSlot, 1600, 'mockup-hero', heroInner) +
+      '<div class="mockup-tiles">' +
+        mediaDropMarkup('category-coffee', 800, 'mockup-tile', coffeeInner) +
+        mediaDropMarkup('category-tea', 800, 'mockup-tile', teaInner) +
+      '</div>' +
+      '<div class="mockup-story-band">' +
+        mediaDropMarkup('brand-story', 1200, 'mockup-story-img') +
+        '<div class="mockup-story-copy">' +
+          '<span class="mockup-eyebrow">Our approach</span>' +
+          '<p class="mockup-story-p">We work directly with a small number of farms and gardens, paying for quality and traceability first; every bag and tin carries the origin, altitude, and process behind it, because we think that context is part of what you’re buying.</p>' +
+        '</div>' +
+      '</div>';
 
     wireDropzones($('site-mockup'));
     $('site-mockup').querySelectorAll('.hero-dot-btn').forEach((btn) => {
@@ -906,18 +950,9 @@
       mediaDropMarkup('product-placeholder', 800) +
       '<div class="fallback-slot-copy">' +
         '<div class="fs-title">Default product photo</div>' +
-        '<div class="fs-desc">Not shown on the homepage itself — used automatically for any product that doesn’t have its own photo yet.</div>' +
+        '<div class="fs-desc">Not shown on the homepage itself. Used automatically for any product that doesn’t have its own photo yet.</div>' +
       '</div>';
     wireDropzones($('fallback-slot'));
-  }
-
-  function renderLegend() {
-    const order = ['hero-1', 'hero-2', 'hero-3', 'category-coffee', 'category-tea', 'brand-story', 'product-placeholder'];
-    $('mockup-legend').innerHTML = order.map((slug) => {
-      const s = slotBySlug(slug);
-      const status = s && s.uploaded ? new Date(s.uploaded).toLocaleDateString() : 'default photo';
-      return '<b>' + escapeHtml(SITE_MEDIA_LEGEND[slug] || slug) + ':</b> ' + escapeHtml(status);
-    }).join(' &nbsp;·&nbsp; ');
   }
 
   function wireDropzones(container) {
