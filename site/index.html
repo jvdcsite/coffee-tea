@@ -707,7 +707,7 @@
 <body>
 
 <div class="utility-bar">
-  <div class="wrap"><span id="utility-text">Free shipping on orders over $40</span></div>
+  <div class="wrap"><span id="utility-text">Free shipping on orders over &#8369;2,000</span></div>
 </div>
 
 <header class="site-nav" id="site-nav">
@@ -996,7 +996,7 @@
     <p class="cart-empty">Your cart is empty.</p>
   </div>
   <div class="cart-footer">
-    <div class="cart-subtotal"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
+    <div class="cart-subtotal"><span>Subtotal</span><span id="cart-subtotal">₱0.00</span></div>
     <input type="email" class="cart-checkout-email" id="cart-checkout-email" placeholder="you@example.com (for your receipt)" autocomplete="email">
     <button class="btn-primary full" id="cart-checkout-btn">Checkout</button>
     <p class="cart-checkout-msg" id="cart-checkout-msg" hidden></p>
@@ -1016,7 +1016,7 @@
   // ---------------- Helpers shared by every product-card-shaped view ----------------
 
   function formatPrice(cents, currency) {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format((cents || 0) / 100);
+    return new Intl.NumberFormat('en-PH', { style: 'currency', currency: currency || 'PHP' }).format((cents || 0) / 100);
   }
 
   function escapeHtml(str) {
@@ -1109,7 +1109,7 @@
   // ---------------- Utility bar ----------------
 
   const utilityMessages = [
-    'Free shipping on orders over $40',
+    'Free shipping on orders over ₱2,000',
     'New arrivals dropping every month',
     'Small-batch, always fresh, never warehoused'
   ];
@@ -1484,7 +1484,7 @@
 
     if (cart.length === 0) {
       container.innerHTML = '<p class="cart-empty">Your cart is empty.</p>';
-      $('cart-subtotal').textContent = formatPrice(0, 'USD');
+      $('cart-subtotal').textContent = formatPrice(0, 'PHP');
       return;
     }
 
@@ -1516,7 +1516,7 @@
     container.querySelectorAll('[data-remove]').forEach((b) => b.addEventListener('click', () => removeFromCart(b.dataset.remove)));
 
     const subtotal = cart.reduce((sum, c) => sum + c.price_cents * c.qty, 0);
-    const currency = cart[0] ? cart[0].currency : 'USD';
+    const currency = cart[0] ? cart[0].currency : 'PHP';
     $('cart-subtotal').textContent = formatPrice(subtotal, currency);
   }
 
