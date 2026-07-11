@@ -530,6 +530,18 @@
   .product-buy .price { font-size: 1.3rem; }
   @media (max-width: 860px) { .product-view-grid { grid-template-columns: 1fr; } .product-media { height: 300px; } }
 
+  /* ---------- Pair it with (cross-sell), product detail ---------- */
+  .pair-with { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .pair-with-label { font-family: var(--font-body); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.55; margin: 0 0 14px; }
+  .pair-with-card { display: flex; align-items: center; gap: 14px; }
+  .pair-with-thumb { width: 60px; height: 60px; border-radius: 6px; object-fit: cover; background: var(--paper-raised); flex-shrink: 0; cursor: pointer; }
+  .pair-with-info { flex: 1; min-width: 0; }
+  .pair-with-name { font-family: var(--font-display); font-weight: 400; font-size: 0.95rem; margin: 0; cursor: pointer; }
+  .pair-with-name:hover { text-decoration: underline; }
+  .pair-with-category { display: block; font-size: 0.72rem; opacity: 0.55; margin-top: 2px; }
+  .pair-with-add { padding: 9px 18px; border: 1px solid var(--ink); border-radius: 4px; background: transparent; color: var(--ink); font-family: var(--font-body); font-weight: 600; font-size: 0.78rem; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s; }
+  .pair-with-add:hover { background: var(--ink); color: var(--paper); }
+
   /* ---------- Variant picker (size/grind), product detail ---------- */
   .variant-picker { margin: 0 0 20px; }
   .variant-picker-label { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.55; margin-bottom: 8px; }
@@ -874,6 +886,18 @@
           <span class="stock" id="product-stock"></span>
         </div>
         <button class="btn-primary" id="product-add-cart">Add to cart</button>
+
+        <div class="pair-with" id="product-pairing" hidden>
+          <p class="pair-with-label">Pair it with</p>
+          <div class="pair-with-card">
+            <img class="pair-with-thumb" id="pairing-thumb" src="" alt="">
+            <div class="pair-with-info">
+              <p class="pair-with-name" id="pairing-name"></p>
+              <span class="pair-with-category" id="pairing-category"></span>
+            </div>
+            <button class="pair-with-add" id="pairing-add" type="button"></button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1298,6 +1322,7 @@
     $('product-variants').hidden = true;
     $('product-variants').innerHTML = '';
     updateProductBuyState(p, null);
+    renderPairing(p);
 
     homeView.hidden = true;
     productView.hidden = false;
@@ -1354,6 +1379,34 @@
     addBtn.disabled = stock <= 0;
     addBtn.textContent = stock > 0 ? 'Add to cart' : 'Sold out';
     addBtn.onclick = () => addToCart(p.id, variant ? variant.id : null, variant ? variant.label : null, priceCents);
+  }
+
+  function renderPairing(p) {
+    const pairEl = $('product-pairing');
+    // Prefer the opposite category (coffee <-> tea) so the pairing reads as
+    // a deliberate cross-sell, not just "another product"; fall back to any
+    // other in-stock item if the catalog only has one category live.
+    const inStock = (x) => x.id !== p.id && x.stock_count > 0;
+    const pick = allProducts.find((x) => inStock(x) && x.category !== p.category) ||
+                 allProducts.find(inStock);
+    if (!pick) { pairEl.hidden = true; return; }
+
+    const thumbSrc = pick.thumb_key ? '/media/' + pick.thumb_key :
+      (pick.image_key ? '/media/' + pick.image_key : '/media/marketing/product-placeholder.webp');
+    $('pairing-thumb').src = thumbSrc;
+    $('pairing-thumb').alt = pick.name;
+    $('pairing-name').textContent = pick.name;
+    $('pairing-category').textContent = pick.category;
+
+    const goToPick = () => { location.hash = '#/product/' + pick.id; };
+    $('pairing-thumb').onclick = goToPick;
+    $('pairing-name').onclick = goToPick;
+
+    const addBtn = $('pairing-add');
+    addBtn.textContent = 'Add | ' + formatPrice(pick.price_cents, pick.currency);
+    addBtn.onclick = () => addToCart(pick.id, null, null, pick.price_cents);
+
+    pairEl.hidden = false;
   }
 
   function showHomeView() {
